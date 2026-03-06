@@ -3,7 +3,7 @@ import jax.numpy as jnp
 import numpy as np
 
 
-class QuantumSimulator:
+class JpcChip:
     PI = jnp.pi
 
     DIM_A = 10
@@ -57,7 +57,7 @@ class QuantumSimulator:
         return self.H_kerr + g_conv * (dq.tensor(self.a, self.b_dag) + dq.tensor(self.a_dag, self.b)) + g_sq * (
                 dq.tensor(self.a, self.b) + dq.tensor(self.a_dag, self.b_dag))
 
-    def get_next_state(self, x: float, psi, t: np.ndarray, params_G: list[np.ndarray]):
+    def get_next_state(self, x: float, psi, t: np.ndarray, params_G: np.ndarray):
         """
         Entrainement sur un train (1/8 de période)
         """
@@ -71,7 +71,7 @@ class QuantumSimulator:
 
         return result
 
-    def run_simulation(self, X: np.ndarray, params_G: list[np.ndarray]) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def run_simulation(self, X: np.ndarray, params_G: np.ndarray) -> np.ndarray:
 
         """
         Entrainement sur toutes les données
@@ -85,7 +85,7 @@ class QuantumSimulator:
 
         """
         # First train
-        time_interval = jnp.linspace(0, self.INCREMENT_TIME, self.STEP_RESOLUTION)
+        time_interval = np.linspace(0, self.INCREMENT_TIME, self.STEP_RESOLUTION)
 
 
         nb_simus = len(params_G)
@@ -109,8 +109,7 @@ class QuantumSimulator:
             for i, Q in enumerate(Quadratures):
                 Q.update(result.expects[i], time)
 
-
-        return [Q.build_F() for Q in Quadratures]
+        return np.stack([Q.build_F() for Q in Quadratures], axis=0)
 
 
 class Quadrature:

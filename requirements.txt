@@ -1,0 +1,6 @@
+zeroth-learn
+matplotlib
+dynamics
+pandas
+numpy
+jax
