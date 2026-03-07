@@ -42,7 +42,7 @@ class QuantumBlackBox(ZerothOrderBlackBox):
         Returns:
             np.ndarray: Output. Shape: (output_dim, batch_size).
         """
-        return self.simulator.run_simulation(X, self.params[np.newaxis, :])
+        return self.simulator.run_simulation(X, self.params[None, :])
 
     def forward_perturbed(self, X: np.ndarray, gradient_estimator: GradientEstimator) -> np.ndarray:
         """Parallel forward pass for multiple perturbed versions of the network.

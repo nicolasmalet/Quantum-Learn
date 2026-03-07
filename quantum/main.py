@@ -8,9 +8,10 @@ from zeroth.utils.metrics import accuracy
 
 Q_ModelConfig = QuantumModelConfig(
     name="Q_Model",
+    id={},
     loss=CrossEntropy(),
     metric=accuracy,
-    batch_size=1,
+    batch_size=10,
     nb_epochs=1,
 
     neural_network_config=linear,
@@ -22,5 +23,7 @@ Q_ModelConfig = QuantumModelConfig(
 
 def main():
     M = Q_ModelConfig.instantiate()
-    data = create_data_sinus_vs_square(100, 20)
-    M.train(data, 10)
+    data = create_data_sinus_vs_square(500, 100)
+    M.train(data, 50)
+    M.plot_loss()
+    M.test(data)

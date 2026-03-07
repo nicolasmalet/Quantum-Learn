@@ -1,21 +1,21 @@
 from zeroth.zeroth_order import ZerothOrderOptimizer, GradientEstimator, GradientEstimatorConfig, ZerothOrderOptimizerConfig
 from zeroth.first_order import FirstOrderOptimizer, FirstOrderNeuralNetwork, FirstOrderOptimizerConfig
 from zeroth.abstract import NeuralNetworkConfig
-from zeroth.losses import Loss
+from zeroth import Model, ModelConfig
 from .data import DataSignal
 
 from .quantum_black_box import QuantumBlackBox, QuantumBlackBoxConfig
 
 from dataclasses import dataclass
 from matplotlib.axes import Axes
-from typing import Callable
+from typing import override
 
 import pandas as pd
 import numpy as np
 
 
 @dataclass(frozen=True)
-class QuantumModelConfig:
+class QuantumModelConfig(ModelConfig):
     """
     name (str): Name of the model (used for display and saving).
     loss (Loss): The loss class.
@@ -24,12 +24,6 @@ class QuantumModelConfig:
     plot_results (Callable): Function to visualize test results.
     nb_epochs (int): Number of passes through the entire dataset.
     """
-    name: str
-    loss: Loss
-    metric: Callable
-    batch_size: int
-    nb_epochs: int
-
     neural_network_config: NeuralNetworkConfig
     neural_network_optimizer_config: FirstOrderOptimizerConfig
 
@@ -41,7 +35,7 @@ class QuantumModelConfig:
         return QuantumModel(self)
 
 
-class QuantumModel:
+class QuantumModel(Model):
     """
     Base class orchestrating the training and testing loop.
 
@@ -51,12 +45,7 @@ class QuantumModel:
 
     def __init__(self, config: QuantumModelConfig):
 
-        self.name: str = config.name
-        self.loss: Loss = config.loss
-        self.metric: Callable = config.metric
-        self.batch_size: int = config.batch_size
-        self.nb_epochs: int = config.nb_epochs
-
+        super().__init__(config)
 
         self.quantum_network: QuantumBlackBox = config.quantum_network_config.instantiate()
         self.nb_quantum_params = self.quantum_network.nb_params
@@ -66,10 +55,7 @@ class QuantumModel:
         self.neural_network: FirstOrderNeuralNetwork = FirstOrderNeuralNetwork(config.neural_network_config)
         self.neural_network_optimizer: FirstOrderOptimizer = config.neural_network_optimizer_config.instantiate()
 
-        self.train_loss: np.ndarray = np.array([])
-        self.test_loss: float | None = None
-        self.test_accuracy: float | None = None
-
+    @override
     def train(self, data: DataSignal, nb_print: int=0):
         """Runs the training loop over the dataset.
 
@@ -80,8 +66,8 @@ class QuantumModel:
         Returns:
             np.ndarray: Array of loss values recorded at each step (for plotting).
         """
-
-        nb_batches = data.nb_data // self.batch_size
+        self.print_params()
+        nb_batches = data.nb_periods // self.batch_size
 
         self.train_loss = np.zeros(self.nb_epochs * nb_batches, dtype=np.float64)
 
@@ -108,22 +94,19 @@ class QuantumModel:
                 if batch_idx in print_indexes:
                     print(f"            batch n°{batch_idx + 1} out of {nb_batches}, "
                           f"loss : {np.round(self.train_loss[epoch_idx * nb_batches + batch_idx], 3)}")
-            self.test(data)
+                    self.print_params()
 
-    def plot_loss(self, ax: Axes, label: str, smooth_span: int = 50):
-        ax.plot(self.train_loss, alpha=0.25, linewidth=1.0)
-        smooth = self.smooth_curve(self.train_loss, smooth_span)
-        ax.plot(smooth, label=label, linewidth=2.5)
-
-    @staticmethod
-    def smooth_curve(loss: np.ndarray, smooth_span: int) -> np.ndarray:
-        return np.exp(pd.Series(np.log(loss)).ewm(span=smooth_span, adjust=True).mean())
-
+    @override
     def test(self, data):
-        X_test, Y_true = data.X_test, data.Y_test  # (in, batch), (out, batch)
-        Y_pred = self.neural_network.forward(X_test)  # (out, batch)
+        X_test, Y_true = data.X_test, data.Y_test
+        F_pred = self.quantum_network.forward(X_test)[0, :, :]
+        Y_pred = self.neural_network.forward(F_pred)
 
         self.test_accuracy = self.metric(Y_pred, Y_true)
         self.test_loss = self.loss.compute_loss(Y_pred, Y_true)
 
         print(f"    {self.id} accuracy : {self.test_accuracy}, loss : {self.test_loss}")
+
+    def print_params(self) -> None:
+        self.quantum_network.print_params()
+        self.neural_network.print_params()

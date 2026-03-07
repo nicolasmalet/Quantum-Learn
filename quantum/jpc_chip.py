@@ -1,6 +1,7 @@
 import dynamiqs as dq
 import jax.numpy as jnp
 import numpy as np
+from qutip.ui import progress_bars
 
 
 class JpcChip:
@@ -48,7 +49,7 @@ class JpcChip:
     exp_ops = [dq.tensor(a, dq.eye(DIM_B)), dq.tensor(dq.eye(DIM_A), b)]  # Valeurs moyennes à calculer
 
     INCREMENT_TIME = 0.05  # Durée d'un train (1/8 de période)
-    STEP_RESOLUTION = 500  # résolution pour dq
+    STEP_RESOLUTION = 50  # résolution pour dq
 
     def H0(self, g_conv, g_sq):
         """
@@ -67,7 +68,7 @@ class JpcChip:
         H = [self.H0(g_conv, g_sq) + Hd * x for g_conv, g_sq in params_G]
 
         result = dq.mesolve(H, self.jump_ops, psi, t, exp_ops=self.exp_ops,
-                            options=dq.Options(cartesian_batching=False))
+                            options=dq.Options(cartesian_batching=False, progress_meter=False))
 
         return result
 
@@ -86,7 +87,6 @@ class JpcChip:
         """
         # First train
         time_interval = np.linspace(0, self.INCREMENT_TIME, self.STEP_RESOLUTION)
-
 
         nb_simus = len(params_G)
         nb_points = len(X)
