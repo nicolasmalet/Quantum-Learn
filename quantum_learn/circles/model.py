@@ -4,13 +4,10 @@ from zeroth.abstract import NeuralNetworkConfig
 from zeroth import Model, ModelConfig
 from .data import DataSignal
 
-from .quantum_black_box import QuantumBlackBox, QuantumBlackBoxConfig
+from quantum_learn.quantum_black_box import QuantumBlackBox, QuantumBlackBoxConfig
 
 from dataclasses import dataclass
-from matplotlib.axes import Axes
-from typing import override
 
-import pandas as pd
 import numpy as np
 
 
@@ -55,7 +52,7 @@ class QuantumModel(Model):
         self.neural_network: FirstOrderNeuralNetwork = FirstOrderNeuralNetwork(config.neural_network_config)
         self.neural_network_optimizer: FirstOrderOptimizer = config.neural_network_optimizer_config.instantiate()
 
-    @override
+
     def train(self, data: DataSignal, nb_print: int=0):
         """Runs the training loop over the dataset.
 
@@ -66,8 +63,7 @@ class QuantumModel(Model):
         Returns:
             np.ndarray: Array of loss values recorded at each step (for plotting).
         """
-        self.print_params()
-        nb_batches = data.nb_periods // self.batch_size
+        nb_batches = data.nb_data // self.batch_size
 
         self.train_loss = np.zeros(self.nb_epochs * nb_batches, dtype=np.float64)
 
@@ -78,6 +74,7 @@ class QuantumModel(Model):
             data.prepare_data(self.batch_size)
             for batch_idx in range(nb_batches):
                 X_train, Y_train = data.X_train[batch_idx], data.Y_train[batch_idx]
+
 
                 pF_pred = self.quantum_network.forward_perturbed(X_train, self.quantum_gradient_estimator) # shape (3, out, nb_points)
                 pY_pred = self.neural_network.forward(pF_pred) # shape (nb_params + 1, out, nb_points)
@@ -91,12 +88,12 @@ class QuantumModel(Model):
 
                 self.train_loss[epoch_idx * nb_batches + batch_idx] = avg_loss
 
+
                 if batch_idx in print_indexes:
                     print(f"            batch n°{batch_idx + 1} out of {nb_batches}, "
                           f"loss : {np.round(self.train_loss[epoch_idx * nb_batches + batch_idx], 3)}")
-                    self.print_params()
+                    #self.print_params()
 
-    @override
     def test(self, data):
         X_test, Y_true = data.X_test, data.Y_test
         F_pred = self.quantum_network.forward(X_test)[0, :, :]

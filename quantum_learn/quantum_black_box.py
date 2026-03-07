@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import numpy as np
 
-from .jpc_chip import JpcChip
+from quantum_learn.jpc_chip import JpcChip
 from zeroth.zeroth_order.zeroth_order_blackbox import ZerothOrderBlackBox
 from zeroth.zeroth_order.gradient_estimators import GradientEstimator
 
@@ -63,7 +63,7 @@ class QuantumBlackBox(ZerothOrderBlackBox):
 
     def update_params(self, grad: np.ndarray, learning_rate: float) -> None:
         """
-        Updates the quantum parameters
+        Updates the sinus_vs_square parameters
         """
         self.params -= learning_rate * grad
 

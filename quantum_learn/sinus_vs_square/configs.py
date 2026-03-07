@@ -3,14 +3,14 @@ from zeroth import first_order
 from zeroth.zeroth_order.gradient_estimators import FiniteDifferenceConfig
 from zeroth.zeroth_order import ZerothOrderAdamConfig
 from zeroth.abstract import NeuralNetworkConfig, LayerConfig
-from .quantum_black_box import QuantumBlackBoxConfig
+from quantum_learn.quantum_black_box import QuantumBlackBoxConfig
 
 
 import numpy as np
 
 INPUT_DIM = 64
 OUTPUT_DIM = 2
-DEFAULT_PERTURBATION_SCALE = 1e-4
+DEFAULT_PERTURBATION_SCALE = 0.01
 
 
 quantum_network_config = QuantumBlackBoxConfig(
@@ -18,12 +18,12 @@ quantum_network_config = QuantumBlackBoxConfig(
     quantum_params=np.array([50.0, 50.0]),
 )
 
-first_order_adam = first_order.FirstOrderAdamConfig(learning_rate=0.01,
+first_order_adam = first_order.FirstOrderAdamConfig(learning_rate=0.02,
                                                     beta1=0.9,
                                                     beta2=0.99,
                                                     epsilon=1e-8)
 
-zeroth_order_adam = ZerothOrderAdamConfig(learning_rate=0.01,
+zeroth_order_adam = ZerothOrderAdamConfig(learning_rate=0.02,
                                           beta1=0.9,
                                           beta2=0.99,
                                           epsilon=1e-8)

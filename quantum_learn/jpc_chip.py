@@ -2,6 +2,57 @@ import dynamiqs as dq
 import jax.numpy as jnp
 import numpy as np
 from qutip.ui import progress_bars
+import matplotlib.pyplot as plt
+
+
+class Quadrature:
+    def __init__(self, nb_points: int, nb_periods: int, nb_points_per_period: int):
+        self.nb_points            = nb_points
+        self.nb_periods           = nb_periods
+        self.nb_points_per_period = nb_points_per_period
+
+        self.L_Ia = np.zeros(nb_points)
+        self.L_Qa = np.zeros(nb_points)
+        self.L_Ib = np.zeros(nb_points)
+        self.L_Qb = np.zeros(nb_points)
+
+    def update(self, expect, index: int) -> None:
+        a_dq = expect[1]
+        b_dq = expect[2]
+
+        I_a = a_dq.real[-1]
+        Q_a = a_dq.imag[-1]
+        I_b = b_dq.real[-1]
+        Q_b = b_dq.imag[-1]
+
+        self.L_Ia[index] = I_a
+        self.L_Qa[index] = Q_a
+        self.L_Ib[index] = I_b
+        self.L_Qb[index] = Q_b
+
+    def build_F(self) -> np.ndarray:
+        L_Ia = self.L_Ia.reshape(self.nb_periods, self.nb_points_per_period).T
+        L_Qa = self.L_Qa.reshape(self.nb_periods, self.nb_points_per_period).T
+        L_Ib = self.L_Ib.reshape(self.nb_periods, self.nb_points_per_period).T
+        L_Qb = self.L_Qb.reshape(self.nb_periods, self.nb_points_per_period).T
+
+        bloc_A = np.vstack((L_Ia, L_Qa, L_Ib, L_Qb))
+        bloc_B = np.hstack((
+            np.zeros((4 * self.nb_points_per_period, 1)),
+            np.vstack((L_Ia[:, :-1], L_Qa[:, :-1],
+                       L_Ib[:, :-1], L_Qb[:, :-1]))
+        ))
+        return np.vstack((bloc_A, bloc_B))
+
+    def plot(self):
+        X = range(len(self.L_Ia))
+        plt.plot(X, self.L_Ia, label="Ia")
+        plt.plot(X, self.L_Qa, label="Qa")
+        plt.plot(X, self.L_Ib, label="Ib")
+        plt.plot(X, self.L_Qb, label="Qb")
+        plt.legend()
+        plt.show()
+
 
 
 class JpcChip:
@@ -41,7 +92,6 @@ class JpcChip:
     H_d_b = 1j * jnp.sqrt(KAPPA_B) * (EPSILON_B.conjugate() * b - EPSILON_B * b_dag)
     H_d = dq.tensor(H_d_a, dq.eye(DIM_B)) + dq.tensor(dq.eye(DIM_A), H_d_b)
 
-
     PSI0 = [dq.tensor(dq.basis(DIM_A, 0), dq.basis(DIM_B, 0))] * 3
 
     jump_ops = [jnp.sqrt(KAPPA_A) * dq.tensor(a, dq.eye(DIM_B)) + jnp.sqrt(KAPPA_B) * dq.tensor(dq.eye(DIM_A), b)]  # Opérateurs de dissipation
@@ -62,17 +112,15 @@ class JpcChip:
         """
         Entrainement sur un train (1/8 de période)
         """
-        Hd_a = 1j * jnp.sqrt(self.KAPPA_A) * (self.EPSILON_A.conjugate() * self.a - self.EPSILON_A * self.a_dag)
-        Hd_b = 1j * jnp.sqrt(self.KAPPA_B) * (self.EPSILON_B.conjugate() * self.b - self.EPSILON_B * self.b_dag)
-        Hd = dq.tensor(Hd_a, dq.eye(self.DIM_B)) + dq.tensor(dq.eye(self.DIM_A), Hd_b)
-        H = [self.H0(g_conv, g_sq) + Hd * x for g_conv, g_sq in params_G]
+
+        H = [self.H0(g_conv, g_sq) + self.H_d * x for g_conv, g_sq in params_G]
 
         result = dq.mesolve(H, self.jump_ops, psi, t, exp_ops=self.exp_ops,
                             options=dq.Options(cartesian_batching=False, progress_meter=False))
 
         return result
 
-    def run_simulation(self, X: np.ndarray, params_G: np.ndarray) -> np.ndarray:
+    def run_simulation(self, X: np.ndarray, params_G: np.ndarray, plot=False) -> np.ndarray:
 
         """
         Entrainement sur toutes les données
@@ -109,45 +157,7 @@ class JpcChip:
             for i, Q in enumerate(Quadratures):
                 Q.update(result.expects[i], time)
 
+        if plot:
+            Quadratures[0].plot()
+
         return np.stack([Q.build_F() for Q in Quadratures], axis=0)
-
-
-class Quadrature:
-    def __init__(self, nb_points: int, nb_periods: int, nb_points_per_period: int):
-        self.nb_points: int = nb_points
-        self.nb_periods: int = nb_periods
-        self.nb_points_per_period: int = nb_points_per_period
-
-        self.L_Ia: np.ndarray = np.zeros(nb_points)
-        self.L_Qa: np.ndarray = np.zeros(nb_points)
-        self.L_Ib: np.ndarray = np.zeros(nb_points)
-        self.L_Qb: np.ndarray = np.zeros(nb_points)
-
-    def update(self, expect, index: int) -> None:
-        a_dq = expect[1]
-        b_dq = expect[2]
-
-        I_a = a_dq.real[-1]
-        Q_a = a_dq.imag[-1]
-        I_b = b_dq.real[-1]
-        Q_b = b_dq.imag[-1]
-
-
-        self.L_Ia[index] = I_a
-        self.L_Qa[index] = Q_a
-        self.L_Ib[index] = I_b
-        self.L_Qb[index] = Q_b
-
-    def build_F(self) -> np.ndarray:
-        L_Ia = np.reshape(self.L_Ia, (self.nb_points_per_period, self.nb_periods))
-        L_Qa = np.reshape(self.L_Qa, (self.nb_points_per_period, self.nb_periods))
-        L_Ib = np.reshape(self.L_Ib, (self.nb_points_per_period, self.nb_periods))
-        L_Qb = np.reshape(self.L_Qb, (self.nb_points_per_period, self.nb_periods))
-
-        return np.vstack((
-            np.vstack((L_Ia, L_Qa, L_Ib, L_Qb)),
-             np.hstack((
-                 np.zeros((4 * self.nb_points_per_period, 1)),
-                 np.vstack((L_Ia[:, :-1], L_Qa[:, :-1], L_Ib[:, :-1], L_Qb[:, :-1]))
-             ))
-        ))
