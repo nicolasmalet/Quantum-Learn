@@ -42,45 +42,29 @@ class Quadrature:
     Je l'ai vu dans un rêve...
     """
 
-    def __init__(self, nb_points: int, nb_periods: int, nb_points_per_period: int, nb_points_per_drive = 1):
-        self.nb_points            = nb_points
-        self.nb_periods           = nb_periods
-        self.nb_points_per_period = nb_points_per_period
-        self.nb_points_per_drive = nb_points_per_drive
+    def __init__(self, nb_simus, nb_points, nb_periods, PER_PERIODS, MEASURE_RESOLUTION, SIMU_RESOLUTION, expects):
+        self.nb_simus = nb_simus
+        self.nb_points = nb_points
+        self.nb_periods = nb_periods
+        self.PER_PERIODS = PER_PERIODS
+        self.MEASURE_RESOLUTION = MEASURE_RESOLUTION
+        self.SIMU_RESOLUTION = SIMU_RESOLUTION
+        step = SIMU_RESOLUTION // MEASURE_RESOLUTION
 
-        self.L_Ia = np.zeros(nb_points * nb_points_per_drive)
-        self.L_Qa = np.zeros(nb_points * nb_points_per_drive)
-        self.L_Ib = np.zeros(nb_points * nb_points_per_drive)
-        self.L_Qb = np.zeros(nb_points * nb_points_per_drive)
+        print(expects[0])
 
-    def update(self, expect, index: int, multiple_inputs=True) -> None:
-        """
-        Update les quadratures
+        self.L_Ia = expects[0].real[::step] 
+        self.L_Qa = expects[0].imag[::step] 
+        self.L_Ib = expects[1].real[::step] 
+        self.L_Qb = expects[1].imag[::step] 
+        #print(expects[0].shape)
+        #print(expects[0].shape)
+        #print(self.L_Ia[0].shape)
+        #print("Step =", step)
 
-        Parameters
-        ----------
-        expect : list
-            liste contenant <a> et <b>
-        idex : int
-            indice de l'update
-        multiple_inputs : boolean
-            indique si les quadratures a et b sont différentes
-        """
 
-        ### 50 k tq t[50k] = 5k ns pour k\in{0,..,9}
-        a_dq = expect[0]
-        
-        for k in range(self.nb_points_per_drive):
-            self.L_Ia[self.nb_points_per_drive * index + k] = a_dq[50 * k].real
-            self.L_Qa[self.nb_points_per_drive * index + k] = a_dq[50 * k].imag
 
-        if multiple_inputs:
-            b_dq = expect[1]
-            for k in range(self.nb_points_per_drive):
-                self.L_Ib[self.nb_points_per_drive * index + k] = b_dq[50 * k].real
-                self.L_Qb[self.nb_points_per_drive * index + k] = b_dq[50 * k].imag
-        
-        
+
 
     def build_F(self, multiple_inputs=True) -> np.ndarray:
         """
@@ -96,34 +80,15 @@ class Quadrature:
         F : jnp.array 
             Feature matrix F(X)
         """
+        
+        L_Ia = self.L_Ia.reshape(self.nb_periods, self.PER_PERIODS * self.MEASURE_RESOLUTION).T
+        L_Qa = self.L_Qa.reshape(self.nb_periods, self.PER_PERIODS * self.MEASURE_RESOLUTION).T
+        L_Ib = self.L_Ib.reshape(self.nb_periods, self.PER_PERIODS * self.MEASURE_RESOLUTION).T
+        L_Qb = self.L_Qb.reshape(self.nb_periods, self.PER_PERIODS * self.MEASURE_RESOLUTION).T
+        return np.vstack((L_Ia, L_Qa, L_Ib, L_Qb))
 
-        L_Ia = self.L_Ia.reshape(self.nb_periods, self.nb_points_per_period * self.nb_points_per_drive).T
-        L_Qa = self.L_Qa.reshape(self.nb_periods, self.nb_points_per_period * self.nb_points_per_drive).T
-        #print("Ia =", self.L_Ia, "   taille =", self.L_Ia.shape) 
-        #print("Qa =", self.L_Qa, "   taille =", self.L_Qa.shape) 
-        #print("Iamod =", L_Ia, "   taille =", L_Ia.shape) 
-        #print("Qamod =", L_Qa, "   taille =", L_Qa.shape) 
 
-        if multiple_inputs :
-            L_Ib = self.L_Ib.reshape(self.nb_periods, self.nb_points_per_period * self.nb_points_per_drive).T
-            L_Qb = self.L_Qb.reshape(self.nb_periods, self.nb_points_per_period * self.nb_points_per_drive).T
-            bloc_A = np.vstack((L_Ia, L_Qa, L_Ib, L_Qb))
-            return np.array(bloc_A)
-
-        '''
-        if multiple_inputs :
-            bloc_B = np.hstack((
-                jnp.zeros((4 * self.nb_points_per_period, 1)),
-                jnp.vstack((L_Ia[:, :-1], L_Qa[:, :-1],
-                        L_Ib[:, :-1], L_Qb[:, :-1]))
-            ))
-            return jnp.vstack((bloc_A, bloc_B))
-        '''
-    
-        bloc_A = np.vstack((L_Ia, L_Qa))
-        return np.array(bloc_A)
-
-    def plot(self, multiple_inputs=True):
+    def plot(self):
         '''
         Plot les quadratures en fonction du temps
 
@@ -133,12 +98,11 @@ class Quadrature:
             indique si les quadratures a et b sont différentes
         '''
 
-        X = range(len(self.L_Ia))
+        X = range(self.nb_points * self.MEASURE_RESOLUTION)
         plt.plot(X, self.L_Ia, label="Ia")
         plt.plot(X, self.L_Qa, label="Qa")
-        if multiple_inputs :
-            plt.plot(X, self.L_Ib, label="Ib")
-            plt.plot(X, self.L_Qb, label="Qb")
+        plt.plot(X, self.L_Ib, label="Ib")
+        plt.plot(X, self.L_Qb, label="Qb")
         plt.legend()
         plt.show()
 
@@ -208,8 +172,8 @@ class JpcChip:
 
     PI = jnp.pi
     ### Grandeurs physiques de la puce ###
-    DIM_A = 18
-    DIM_B = 18
+    DIM_A = 10
+    DIM_B = 10
     OMEGA_A = 1e4
     OMEGA_B = 9 * 1e3
     KAPPA_A = 17
@@ -237,15 +201,22 @@ class JpcChip:
     H_kerr_b = K_BB * N_b @ N_b
     H_cross = -K_AB * dq.tensor(N_a, N_b)
     H_kerr = dq.tensor(H_kerr_a, dq.eye(DIM_B)) + dq.tensor(dq.eye(DIM_A), H_kerr_b) + H_cross
-    H_da = dq.tensor(1j * jnp.sqrt(KAPPA_A) * (EPSILON_A.conjugate() * a - EPSILON_A * a_dag), dq.eye(DIM_B))
-    H_db = dq.tensor(dq.eye(DIM_A), 1j * jnp.sqrt(KAPPA_B) * (EPSILON_B.conjugate() * b - EPSILON_B * b_dag))
+    #H_da = dq.tensor(1j * jnp.sqrt(KAPPA_A) * (EPSILON_A.conjugate() * a - EPSILON_A * a_dag), dq.eye(DIM_B))
+    #H_db = dq.tensor(dq.eye(DIM_A), 1j * jnp.sqrt(KAPPA_B) * (EPSILON_B.conjugate() * b - EPSILON_B * b_dag))
+    H_da = dq.tensor( jnp.sqrt(KAPPA_A) * (EPSILON_A.conjugate() * a + EPSILON_A * a_dag), dq.eye(DIM_B))
+    H_db = dq.tensor(dq.eye(DIM_A),jnp.sqrt(KAPPA_B) * (EPSILON_B.conjugate() * b + EPSILON_B * b_dag))
     Hd = H_da + H_db
 
     ### Paramètres pour dq.mesolve ###
     VACCUM_STATE = dq.tensor(dq.basis(DIM_A, 0), dq.basis(DIM_B, 0)) # états initiaux === vaccum states 
     jump_ops = [jnp.sqrt(KAPPA_A) * dq.tensor(a, dq.eye(DIM_B)), jnp.sqrt(KAPPA_B) * dq.tensor(dq.eye(DIM_A), b)]  # Opérateurs de dissipation
     exp_ops = [dq.tensor(a, dq.eye(DIM_B)), dq.tensor(dq.eye(DIM_A), b)]  # Valeurs moyennes à calculer
-    STEP_RESOLUTION = 500  # résolution des simulations Dynamiqs
+
+    # QUADRATURES FEATURES
+    PER_PERIODS = 8
+    MEASURE_RESOLUTION = 10
+    SIMU_RESOLUTION = 200  # résolution des simulations Dynamiqs
+
 
 
     def H0(self, g_conv, g_sq):
@@ -267,50 +238,17 @@ class JpcChip:
         return self.H_kerr + g_conv * (dq.tensor(self.a, self.b_dag) + dq.tensor(self.a_dag, self.b)) + g_sq * (
                 dq.tensor(self.a, self.b) + dq.tensor(self.a_dag, self.b_dag))
 
-    def ModData(self, t, data, nb_points_per_drive):
+    def Data_simu(self, t, data):
         '''
-        Liste des données exploitable. 
+        Crée une liste X de même taille que le temps.
         '''
         tab_data = np.zeros(len(t))
         for i in range(len(data)):
-            tab_data[i * nb_points_per_drive: (i+1) * nb_points_per_drive] = data[i]
+            tab_data[i * self.MEASURE_RESOLUTION: (i+1) * self.MEASURE_RESOLUTION] = data[i]
         return tab_data[:-1]
 
-    def get_next_state(self, x, psi, t: jnp.ndarray, params_G: list, multiple_inputs=True):
-        """
-        Résout l'équation de Lindblad pour plusieurs valeurs possibles du couple
-        (g_conv, g_sq) sur les instants t avec psi comme état initial
 
-        Parameters
-        ----------
-        x : float or 
-            entrée(s) encodée(s) en amplitude du drive
-        psi : 
-            état initial de la simulation à t=t[0]
-        t : jnp.ndarray
-            tableau des instants de la simulation
-        params_G : list
-            liste des valeurs du couple (g_conv, g_sq)
-        multiple_inputs : boolean
-            précise si il y a plusieurs données d'entrée point par point
-        Returns
-        -------
-        dynamiqs.result.MESolveResult
-            Résultat de la simulation dynamiqs
-        """
-
-        if multiple_inputs:
-            xa, xb = x[0], x[1]
-            H = [self.H0(g_conv, g_sq) + xa * self.H_da + xb * self.H_db for g_conv, g_sq in params_G]
-        else :
-            H = [self.H0(g_conv, g_sq) + self.Hd * x for g_conv, g_sq in params_G]
-
-        result = dq.mesolve(H, self.jump_ops, psi, t, exp_ops=self.exp_ops,
-                            options=dq.Options(cartesian_batching=False, progress_meter=False))
-
-        return result
-
-    def run_simulation(self, X: jnp.ndarray, params_G: list, multiple_inputs=True, plot=False, params_feature=[8, 10]) -> jnp.ndarray:
+    def run_simulation(self, X: jnp.ndarray, params_G: list, plot=False) -> jnp.ndarray:
         """
         Entraîne la puce sur toutes les données
         -> résout l'équation de Lindblad drive après drive pour plusieurs valeurs possibles du couple
@@ -337,30 +275,26 @@ class JpcChip:
         F3 : jnp.array of shape 64 x len(X)
             Feature matrix for the simulation 3
         """
-        # First train
-        time_interval = jnp.linspace(0, self.INCREMENT_TIME, self.STEP_RESOLUTION)
-        psi = self.VACCUM_STATE
 
         nb_simus = len(params_G)
         nb_points = len(X)
-        nb_points_per_period = params_feature[0]
-        nb_points_per_drive = params_feature[1]
-        nb_periods = len(X) // nb_points_per_period
+        nb_periods = len(X) // self.PER_PERIODS
 
-        Quadratures = [Quadrature(nb_points, nb_periods, nb_points_per_period, nb_points_per_drive=nb_points_per_drive) for _ in range(nb_simus)]
 
         # Tableaux des features (sorties de la puce) -> Matrice de taille 64 x n_periodes
+        time_interval = jnp.linspace(0, self.INCREMENT_TIME * len(X), self.SIMU_RESOLUTION * len(X))
         psi = self.VACCUM_STATE
+        tab_data = self.Data_simu(time_interval, X)
 
-        for time in range(len(X)):
-            result = self.get_next_state(X[time], psi, time_interval, params_G, multiple_inputs=multiple_inputs)
-            time_interval += self.INCREMENT_TIME
-            psi = [result.states[i][-1] for i in range(nb_simus)]
-            # update des quadratures
-            for i, Q in enumerate(Quadratures):
-                Q.update(result.expects[i], time, multiple_inputs=multiple_inputs)
+        #H = [self.H0(g_conv, g_sq) + dq.pwc(time_interval, tab_data, self.Hd) for g_conv, g_sq in params_G]
+        H = [self.H0(g_conv, g_sq)  + 2 * self.Hd for g_conv, g_sq in params_G]
 
+        result = dq.mesolve(H, self.jump_ops, psi, time_interval, exp_ops=self.exp_ops,
+                            options=dq.Options(cartesian_batching=False, progress_meter=False))
+        
+        Quadratures = [Quadrature(nb_simus, nb_points, nb_periods, self.PER_PERIODS, self.MEASURE_RESOLUTION, self.SIMU_RESOLUTION, result.expects[i]) for i in range(nb_simus)]
+      
         if plot:
-            Quadratures[0].plot(multiple_inputs=multiple_inputs)
+            Quadratures[0].plot()
 
-        return jnp.stack([Q.build_F(multiple_inputs=multiple_inputs) for Q in Quadratures], axis=0)
+        return np.stack([Q.build_F() for Q in Quadratures], axis=0)
