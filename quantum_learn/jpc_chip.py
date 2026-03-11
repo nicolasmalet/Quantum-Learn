@@ -208,8 +208,8 @@ class JpcChip:
 
     PI = jnp.pi
     ### Grandeurs physiques de la puce ###
-    DIM_A = 10
-    DIM_B = 10
+    DIM_A = 18
+    DIM_B = 18
     OMEGA_A = 1e4
     OMEGA_B = 9 * 1e3
     KAPPA_A = 17
@@ -267,6 +267,15 @@ class JpcChip:
         return self.H_kerr + g_conv * (dq.tensor(self.a, self.b_dag) + dq.tensor(self.a_dag, self.b)) + g_sq * (
                 dq.tensor(self.a, self.b) + dq.tensor(self.a_dag, self.b_dag))
 
+    def ModData(self, t, data, nb_points_per_drive):
+        '''
+        Liste des données exploitable. 
+        '''
+        tab_data = np.zeros(len(t))
+        for i in range(len(data)):
+            tab_data[i * nb_points_per_drive: (i+1) * nb_points_per_drive] = data[i]
+        return tab_data[:-1]
+
     def get_next_state(self, x, psi, t: jnp.ndarray, params_G: list, multiple_inputs=True):
         """
         Résout l'équation de Lindblad pour plusieurs valeurs possibles du couple
@@ -289,6 +298,7 @@ class JpcChip:
         dynamiqs.result.MESolveResult
             Résultat de la simulation dynamiqs
         """
+
         if multiple_inputs:
             xa, xb = x[0], x[1]
             H = [self.H0(g_conv, g_sq) + xa * self.H_da + xb * self.H_db for g_conv, g_sq in params_G]
@@ -343,7 +353,6 @@ class JpcChip:
         psi = self.VACCUM_STATE
 
         for time in range(len(X)):
-
             result = self.get_next_state(X[time], psi, time_interval, params_G, multiple_inputs=multiple_inputs)
             time_interval += self.INCREMENT_TIME
             psi = [result.states[i][-1] for i in range(nb_simus)]
