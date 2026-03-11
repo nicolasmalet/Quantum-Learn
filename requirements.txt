@@ -1,6 +1,6 @@
 zeroth-learn
 matplotlib
-dynamics
+dynamiqs
 pandas
 numpy
 jax

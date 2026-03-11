@@ -1,26 +1,18 @@
 from zeroth.zeroth_order import ZerothOrderOptimizer, GradientEstimator, GradientEstimatorConfig, ZerothOrderOptimizerConfig
 from zeroth.first_order import FirstOrderOptimizer, FirstOrderNeuralNetwork, FirstOrderOptimizerConfig
-from zeroth.abstract import NeuralNetworkConfig
-from zeroth import Model, ModelConfig
-from quantum_learn.data import DataSignal
+from zeroth.abstract import NeuralNetworkConfig, Model, ModelConfig
 
-from quantum_learn.quantum_black_box import QuantumBlackBox, QuantumBlackBoxConfig
+
+from ..quantum_black_box import QuantumBlackBox, QuantumBlackBoxConfig
+from .data import DataSignal
+
 
 from dataclasses import dataclass
-
 import numpy as np
 
 
 @dataclass(frozen=True)
 class QuantumModelConfig(ModelConfig):
-    """
-    name (str): Name of the model (used for display and saving).
-    loss (Loss): The loss class.
-    metric (Callable): Function (Y_pred, Y_true) -> score (e.g., accuracy).
-    batch_size (int): Number of samples per gradient update.
-    plot_results (Callable): Function to visualize test results.
-    nb_epochs (int): Number of passes through the entire dataset.
-    """
     neural_network_config: NeuralNetworkConfig
     neural_network_optimizer_config: FirstOrderOptimizerConfig
 
@@ -75,8 +67,8 @@ class QuantumModel(Model):
             for batch_idx in range(nb_batches):
                 X_train, Y_train = data.X_train[batch_idx], data.Y_train[batch_idx]
 
-
-                pF_pred = self.quantum_network.forward_perturbed(X_train, self.quantum_gradient_estimator) # shape (3, out, nb_points)
+                Quadratures = self.quantum_network.forward_perturbed(X_train, self.quantum_gradient_estimator) # shape (3, out, nb_points)
+                pF_pred = np.stack([Q.build_F(data.nb_periods_per_batch, data.nb_points_per_period) for Q in Quadratures], axis=0)
                 pY_pred = self.neural_network.forward(pF_pred) # shape (nb_params + 1, out, nb_points)
                 avg_loss, pLoss = self.loss.compute_losses_for_zeroth_order(pY_pred, Y_train)
 
@@ -88,15 +80,9 @@ class QuantumModel(Model):
 
                 self.train_loss[epoch_idx * nb_batches + batch_idx] = avg_loss
 
-                # F_pred = self.quantum_network.forward(X_train)[0]
-                #
-                # avg_loss = self.neural_network_optimizer.do_descent(self.neural_network, self.loss, F_pred, Y_train)
-                # self.train_loss[epoch_idx * nb_batches + batch_idx] = avg_loss
-
                 if batch_idx in print_indexes:
                     print(f"            batch n°{batch_idx + 1} out of {nb_batches}, "
                           f"loss : {np.round(self.train_loss[epoch_idx * nb_batches + batch_idx], 3)}")
-                    #self.print_params()
 
     def test(self, data):
         X_test, Y_true = data.X_test, data.Y_test

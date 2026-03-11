@@ -1,15 +1,21 @@
-from dataclasses import dataclass
-import numpy as np
-
-from quantum_learn.jpc_chip import JpcChip
 from zeroth.zeroth_order.zeroth_order_blackbox import ZerothOrderBlackBox
 from zeroth.zeroth_order.gradient_estimators import GradientEstimator
+
+from quantum_simulation.simulation_params import SimulationParams
+from quantum_simulation.quantum_params import QuantumParams
+from quantum_simulation.quadrature import Quadrature
+from quantum_simulation.jpc_chip import JpcChip
+
+from dataclasses import dataclass
+import numpy as np
 
 
 @dataclass
 class QuantumBlackBoxConfig:
     name: str
     quantum_params: np.ndarray
+    quantum_parameters: QuantumParams
+    simulation_params: SimulationParams
 
     def instantiate(self):
         return QuantumBlackBox(self)
@@ -22,7 +28,7 @@ class QuantumBlackBox(ZerothOrderBlackBox):
         self.params = config.quantum_params
         self.nb_params = len(self.params)
 
-        self.simulator = JpcChip()
+        self.simulator = JpcChip(config.quantum_parameters, config.simulation_params)
 
     def get_params(self):
         return self.params
@@ -33,7 +39,7 @@ class QuantumBlackBox(ZerothOrderBlackBox):
     def print_params(self):
         print(f"g_conv, g_sq: {self.params}")
 
-    def forward(self, X: np.ndarray):
+    def forward(self, X: np.ndarray) -> list[Quadrature]:
         """Standard forward pass using the current nominal weights.
 
         Args:
@@ -42,9 +48,10 @@ class QuantumBlackBox(ZerothOrderBlackBox):
         Returns:
             np.ndarray: Output. Shape: (output_dim, batch_size).
         """
+
         return self.simulator.run_simulation(X, self.params[None, :])
 
-    def forward_perturbed(self, X: np.ndarray, gradient_estimator: GradientEstimator) -> np.ndarray:
+    def forward_perturbed(self, X: np.ndarray, gradient_estimator: GradientEstimator) -> list[Quadrature]:
         """Parallel forward pass for multiple perturbed versions of the network.
 
         This method broadcasts the input X across T perturbed parameter sets

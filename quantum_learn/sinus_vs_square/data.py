@@ -10,6 +10,7 @@ class DataSignal:
         self.nb_periods = self.nb_data // self.nb_points_per_period
         self.nb_tests: int = raw_X_test.shape[0]
 
+        self.nb_periods_per_batch: int | None = None
         self.batch_size: int | None = None
         self.nb_batches: int | None = None
 
@@ -21,8 +22,9 @@ class DataSignal:
         self.X_train: np.ndarray = np.array([])
         self.Y_train: np.ndarray = np.array([])
 
-    def prepare_data(self, batch_size: int) -> None:
-        self.batch_size = batch_size
+    def prepare_data(self, nb_periods_per_batch: int) -> None:
+        self.nb_periods_per_batch = nb_periods_per_batch
+        self.batch_size =nb_periods_per_batch
         self.nb_batches = self.nb_data // self.batch_size
 
         self.X_train = np.reshape(self.raw_X_train, (-1, self.nb_points_per_period * self.batch_size))

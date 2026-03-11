@@ -1,0 +1,1 @@
+from .model_config import quantum_model_config
