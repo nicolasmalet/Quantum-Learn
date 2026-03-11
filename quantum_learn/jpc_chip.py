@@ -172,8 +172,8 @@ class JpcChip:
 
     PI = jnp.pi
     ### Grandeurs physiques de la puce ###
-    DIM_A = 10
-    DIM_B = 10
+    DIM_A = 15
+    DIM_B = 15
     OMEGA_A = 1e4
     OMEGA_B = 9 * 1e3
     KAPPA_A = 17
@@ -183,8 +183,8 @@ class JpcChip:
     K_AB = 0.05
 
     ### Paramètres du drive ####
-    EPSILON_A = 550  # amplitude drive a 
-    EPSILON_B = 550  # amplitude drive b
+    EPSILON_A = 20  # amplitude drive a 
+    EPSILON_B = 20 # amplitude drive b
     INCREMENT_TIME = 0.05  # Durée d'un drive
 
 
@@ -287,7 +287,7 @@ class JpcChip:
         tab_data = self.Data_simu(time_interval, X)
 
         #H = [self.H0(g_conv, g_sq) + dq.pwc(time_interval, tab_data, self.Hd) for g_conv, g_sq in params_G]
-        H = [self.H0(g_conv, g_sq)  + 2 * self.Hd for g_conv, g_sq in params_G]
+        H = [self.H0(g_conv, g_sq) for g_conv, g_sq in params_G]
 
         result = dq.mesolve(H, self.jump_ops, psi, time_interval, exp_ops=self.exp_ops,
                             options=dq.Options(cartesian_batching=False, progress_meter=False))
