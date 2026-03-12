@@ -1,11 +1,10 @@
-from .quantum_params import QuantumParams
-from .simulation_params import SimulationParams
-from .quadrature import Quadrature
+from quantum_params import QuantumParams
+from simulation_params import SimulationParams
+from quadrature import Quadrature
 
 import jax.numpy as jnp
 import dynamiqs as dq
 import numpy as np
-
 
 class JpcChip:
     """
@@ -72,10 +71,14 @@ class JpcChip:
         time_interval = jnp.linspace(0, self.quantum_parameters.DRIVE_DURATION * len(X),
                                      self.simulation_params.SIMULATION_RESOLUTION * len(X))
         psi = self.quantum_parameters.vacuum_state
-        tab_data = np.repeat(X, self.simulation_params.SIMULATION_RESOLUTION)
-        print(nb_simulations, time_interval.shape)
-        # H = [self.quantum_parameters.H0(g_conv, g_sq) + dq.pwc(time_interval, tab_data, self.quantum_parameters.Hd) for g_conv, g_sq in params_G]
-        H = [self.quantum_parameters.H0(g_conv, g_sq) for g_conv, g_sq in params_G]
+        tab_data = np.repeat(X, self.simulation_params.SIMULATION_RESOLUTION)[:-1]
+        
+        H_drive = dq.pwc(time_interval, tab_data, self.quantum_parameters.Hd)
+        H0s = dq.stack([
+            self.quantum_parameters.H0(g_conv, g_sq)
+            for g_conv, g_sq in params_G
+        ])
+        H = H0s + H_drive
 
         result = dq.mesolve(H, self.quantum_parameters.jump_ops, psi, time_interval,
                             exp_ops=self.quantum_parameters.exp_ops,
