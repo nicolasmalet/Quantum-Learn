@@ -59,7 +59,7 @@ class Quadrature:
         return np.vstack((L_Ia, L_Qa, L_Ib, L_Qb))
 
 
-    def plot(self):
+    def plot(self) -> None:
         # Plot les quadratures en fonction du temps
 
         X = np.arange(len(self.L_Ia))

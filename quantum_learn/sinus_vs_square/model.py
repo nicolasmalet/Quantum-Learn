@@ -45,7 +45,7 @@ class QuantumModel(Model):
         self.neural_network_optimizer: FirstOrderOptimizer = config.neural_network_optimizer_config.instantiate()
 
 
-    def train(self, data: DataSignal, nb_print: int=0):
+    def train(self, data: DataSignal, nb_print: int=0) -> None:
         """Runs the training loop over the dataset.
 
         Args:
@@ -84,7 +84,7 @@ class QuantumModel(Model):
                     print(f"            batch n°{batch_idx + 1} out of {nb_batches}, "
                           f"loss : {np.round(self.train_loss[epoch_idx * nb_batches + batch_idx], 3)}")
 
-    def test(self, data):
+    def test(self, data: DataSignal) -> None:
         X_test, Y_true = data.X_test, data.Y_test
         F_pred = self.quantum_network.forward(X_test)[0, :, :]
         Y_pred = self.neural_network.forward(F_pred)

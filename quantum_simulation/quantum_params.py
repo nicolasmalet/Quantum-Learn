@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import jax.numpy as jnp
 import dynamiqs as dq
+import numpy as np
 
 
 @dataclass
@@ -77,7 +78,7 @@ class QuantumParams:
                     jnp.sqrt(self.KAPPA_B) * dq.tensor(dq.eye(self.DIM_A), self.b)]  # Opérateurs de dissipation
         self.exp_ops = [dq.tensor(self.a, dq.eye(self.DIM_B)), dq.tensor(dq.eye(self.DIM_A), self.b)]  # Valeurs moyennes à calculer
 
-    def H0(self, g_conv, g_sq):
+    def H0(self, g_conv: float, g_sq: float):
         """
         Build the free-drive Hamiltonian.
 

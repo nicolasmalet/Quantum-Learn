@@ -36,7 +36,7 @@ class QuantumBlackBox(ZerothOrderBlackBox):
     def init_params(self, quantum_params: np.ndarray) -> None:
         self.params = quantum_params
 
-    def print_params(self):
+    def print_params(self) -> None:
         print(f"g_conv, g_sq: {self.params}")
 
     def forward(self, X: np.ndarray) -> list[Quadrature]:
