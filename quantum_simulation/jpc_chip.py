@@ -40,8 +40,7 @@ class JpcChip:
         self.quantum_parameters = quantum_parameters
         self.simulation_params = simulation_params
 
-
-    def run_simulation(self, X: np.ndarray, params_G: np.ndarray, plot: bool=False) -> list[Quadrature]:
+    def run_simulation(self, X: np.ndarray, params_G: np.ndarray, plot: bool = False) -> list[Quadrature]:
         """
         Entraîne la puce sur toutes les données
         -> résout l'équation de Lindblad drive après drive pour plusieurs valeurs possibles du couple
@@ -70,18 +69,20 @@ class JpcChip:
 
         # Tableaux des features (sorties de la puce) -> Matrice de taille 64 x n_periodes
 
-        time_interval = jnp.linspace(0, self.quantum_parameters.DRIVE_DURATION * len(X), self.simulation_params.SIMULATION_RESOLUTION * len(X))
+        time_interval = jnp.linspace(0, self.quantum_parameters.DRIVE_DURATION * len(X),
+                                     self.simulation_params.SIMULATION_RESOLUTION * len(X))
         psi = self.quantum_parameters.vacuum_state
         tab_data = np.repeat(X, self.simulation_params.SIMULATION_RESOLUTION)
-
+        print(nb_simulations, time_interval.shape)
         # H = [self.quantum_parameters.H0(g_conv, g_sq) + dq.pwc(time_interval, tab_data, self.quantum_parameters.Hd) for g_conv, g_sq in params_G]
         H = [self.quantum_parameters.H0(g_conv, g_sq) for g_conv, g_sq in params_G]
 
-        result = dq.mesolve(H, self.quantum_parameters.jump_ops, psi, time_interval, exp_ops=self.quantum_parameters.exp_ops,
-                            options=dq.Options(cartesian_batching=False, progress_meter=False))
-        
+        result = dq.mesolve(H, self.quantum_parameters.jump_ops, psi, time_interval,
+                            exp_ops=self.quantum_parameters.exp_ops,
+                            options=dq.Options(cartesian_batching=False, progress_meter=True, save_states=False))
+
         Quadratures = [Quadrature(self.simulation_params, result.expects[i]) for i in range(nb_simulations)]
-      
+
         if plot:
             Quadratures[0].plot()
 

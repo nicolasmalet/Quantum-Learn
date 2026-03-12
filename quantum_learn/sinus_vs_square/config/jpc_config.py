@@ -18,4 +18,4 @@ quantum_params = QuantumParams(
 )
 
 simulation_params = SimulationParams(MEASURE_RESOLUTION=10,
-                                     SIMULATION_RESOLUTION=200)
+                                     SIMULATION_RESOLUTION=10)

@@ -3,7 +3,7 @@ from zeroth.utils.activation_functions import softmax
 from zeroth import first_order
 
 
-INPUT_DIM = 64
+INPUT_DIM = 320
 OUTPUT_DIM = 2
 
 linear: NeuralNetworkConfig = NeuralNetworkConfig(
