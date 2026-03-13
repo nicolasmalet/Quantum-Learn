@@ -1,6 +1,9 @@
 from quantum_simulation.quantum_params import QuantumParams
 from quantum_simulation.simulation_params import SimulationParams
+from .data_config import MEASURE_RESOLUTION
 
+
+NB_QUADRATURES = 4
 
 quantum_params = QuantumParams(
     DIM_A = 15,
@@ -17,5 +20,5 @@ quantum_params = QuantumParams(
     DRIVE_DURATION = 0.05
 )
 
-simulation_params = SimulationParams(MEASURE_RESOLUTION=10,
-                                     SIMULATION_RESOLUTION=10)
+simulation_params = SimulationParams(MEASURE_RESOLUTION=MEASURE_RESOLUTION,
+                                     SIMULATION_RESOLUTION=MEASURE_RESOLUTION)

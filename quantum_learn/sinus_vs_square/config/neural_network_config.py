@@ -2,9 +2,12 @@ from zeroth.abstract import NeuralNetworkConfig, LayerConfig
 from zeroth.utils.activation_functions import softmax
 from zeroth import first_order
 
+from .data_config import *
+from .jpc_config import NB_QUADRATURES
 
-INPUT_DIM = 320
-OUTPUT_DIM = 2
+
+INPUT_DIM = NB_QUADRATURES * NB_POINTS_PER_PERIOD * MEASURE_RESOLUTION
+OUTPUT_DIM = NB_CLASS
 
 linear: NeuralNetworkConfig = NeuralNetworkConfig(
     name="Linear",

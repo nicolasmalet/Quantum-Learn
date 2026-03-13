@@ -1,6 +1,6 @@
-from quantum_params import QuantumParams
-from simulation_params import SimulationParams
-from quadrature import Quadrature
+from .quantum_params import QuantumParams
+from .simulation_params import SimulationParams
+from .quadrature import Quadrature
 
 import jax.numpy as jnp
 import dynamiqs as dq
@@ -27,7 +27,7 @@ class JpcChip:
     Units:  ħ = 1.
             time in microseconds
             frequency in MHz
-            drive amplitude in \sqrt{MHz}
+            drive amplitude in sqrt{MHz}
     The model assumes zero temperature.
 
     References
@@ -72,7 +72,7 @@ class JpcChip:
                                      self.simulation_params.SIMULATION_RESOLUTION * len(X))
         psi = self.quantum_parameters.vacuum_state
         tab_data = np.repeat(X, self.simulation_params.SIMULATION_RESOLUTION)[:-1]
-        
+
         H_drive = dq.pwc(time_interval, tab_data, self.quantum_parameters.Hd)
         H0s = dq.stack([
             self.quantum_parameters.H0(g_conv, g_sq)

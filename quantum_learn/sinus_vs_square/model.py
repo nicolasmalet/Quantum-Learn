@@ -82,7 +82,7 @@ class QuantumModel(Model):
 
                 if batch_idx in print_indexes:
                     print(f"            batch n°{batch_idx + 1} out of {nb_batches}, "
-                          f"loss : {np.round(self.train_loss[epoch_idx * nb_batches + batch_idx], 3)}")
+                          f"loss : {self.train_loss[epoch_idx * nb_batches + batch_idx]}")
 
     def test(self, data: DataSignal) -> None:
         X_test, Y_true = data.X_test, data.Y_test
