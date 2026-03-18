@@ -1,14 +1,13 @@
-from zeroth.zeroth_order import ZerothOrderOptimizer, GradientEstimator, GradientEstimatorConfig, ZerothOrderOptimizerConfig
-from zeroth.first_order import FirstOrderOptimizer, FirstOrderNeuralNetwork, FirstOrderOptimizerConfig
-from zeroth.abstract import NeuralNetworkConfig, Model, ModelConfig
-
-
-from ..quantum_black_box import QuantumBlackBox, QuantumBlackBoxConfig
-from .data import DataSignal
-
-
 from dataclasses import dataclass
+
 import numpy as np
+from zeroth.abstract import NeuralNetworkConfig, Model, ModelConfig
+from zeroth.first_order import FirstOrderOptimizer, FirstOrderNeuralNetwork, FirstOrderOptimizerConfig
+from zeroth.zeroth_order import ZerothOrderOptimizer, GradientEstimator, GradientEstimatorConfig, \
+    ZerothOrderOptimizerConfig
+
+from .data import DataSignal
+from ..quantum_black_box import QuantumBlackBox, QuantumBlackBoxConfig
 
 
 @dataclass(frozen=True)
@@ -38,14 +37,15 @@ class QuantumModel(Model):
 
         self.quantum_network: QuantumBlackBox = config.quantum_network_config.instantiate()
         self.nb_quantum_params = self.quantum_network.nb_params
-        self.quantum_gradient_estimator: GradientEstimator = config.quantum_gradient_estimator.instantiate(self.nb_quantum_params)
-        self.quantum_optimizer: ZerothOrderOptimizer = config.quantum_optimizer_config.instantiate(self.quantum_gradient_estimator)
+        self.quantum_gradient_estimator: GradientEstimator = config.quantum_gradient_estimator.instantiate(
+            self.nb_quantum_params)
+        self.quantum_optimizer: ZerothOrderOptimizer = config.quantum_optimizer_config.instantiate(
+            self.quantum_gradient_estimator)
 
         self.neural_network: FirstOrderNeuralNetwork = FirstOrderNeuralNetwork(config.neural_network_config)
         self.neural_network_optimizer: FirstOrderOptimizer = config.neural_network_optimizer_config.instantiate()
 
-
-    def train(self, data: DataSignal, nb_print: int=0) -> None:
+    def train(self, data: DataSignal, nb_print: int = 0) -> None:
         """Runs the training loop over the dataset.
 
         Args:
@@ -60,16 +60,18 @@ class QuantumModel(Model):
         self.train_loss = np.zeros(self.nb_epochs * nb_batches, dtype=np.float64)
 
         print_indexes = np.linspace(0, nb_batches - 1, nb_print).astype(int)
-        print(f"    Training Model")
+        print(f"    Training {self.id} Model")
         for epoch_idx in range(self.nb_epochs):
             print(f"        epoch n°{epoch_idx + 1} out of {self.nb_epochs}")
             data.prepare_data(self.batch_size)
             for batch_idx in range(nb_batches):
                 X_train, Y_train = data.X_train[batch_idx], data.Y_train[batch_idx]
 
-                Quadratures = self.quantum_network.forward_perturbed(X_train, self.quantum_gradient_estimator) # shape (3, out, nb_points)
-                pF_pred = np.stack([Q.build_F(data.nb_periods_per_batch, data.nb_points_per_period) for Q in Quadratures], axis=0)
-                pY_pred = self.neural_network.forward(pF_pred) # shape (nb_params + 1, out, nb_points)
+                Quadratures = self.quantum_network.forward_perturbed(X_train,
+                                                                     self.quantum_gradient_estimator)  # shape (3, out, nb_points)
+                pF_pred = np.stack(
+                    [Q.build_F(data.nb_periods_per_batch, data.nb_points_per_period) for Q in Quadratures], axis=0)
+                pY_pred = self.neural_network.forward(pF_pred)  # shape (nb_params + 1, out, nb_points)
                 avg_loss, pLoss = self.loss.compute_losses_for_zeroth_order(pY_pred, Y_train)
 
                 gradient = self.quantum_gradient_estimator.get_gradient(pLoss)
@@ -82,11 +84,13 @@ class QuantumModel(Model):
 
                 if batch_idx in print_indexes:
                     print(f"            batch n°{batch_idx + 1} out of {nb_batches}, "
-                          f"loss : {self.train_loss[epoch_idx * nb_batches + batch_idx]}")
+                          f"loss : {self.train_loss[epoch_idx * nb_batches + batch_idx]}",
+                          f"q_params : {self.quantum_network.params}")
 
     def test(self, data: DataSignal) -> None:
         X_test, Y_true = data.X_test, data.Y_test
-        F_pred = self.quantum_network.forward(X_test)[0, :, :]
+        Quadrature = self.quantum_network.forward(X_test)[0]
+        F_pred = Quadrature.build_F(data.nb_periods_per_batch, data.nb_points_per_period)
         Y_pred = self.neural_network.forward(F_pred)
 
         self.test_accuracy = self.metric(Y_pred, Y_true)

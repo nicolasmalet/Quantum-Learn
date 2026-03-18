@@ -1,11 +1,7 @@
-from .data import create_data_sinus_vs_square
-from .config import quantum_model_config
-from .config.data_config import *
+from .config.experiments import EXPERIMENTS
 
 
-def main():
-    M = quantum_model_config.instantiate()
-    data = create_data_sinus_vs_square(NB_PERIOD_TRAIN, NB_PERIOD_TEST, NB_POINTS_PER_PERIOD)
-    M.train(data, NB_PERIOD_TRAIN // BATCH_SIZE)
-    M.plot_loss()
-    M.test(data)
+def main(do_train, do_test, nb_print_train, do_plot_train, do_save):
+    experiment = EXPERIMENTS.quantum_lr.instantiate()
+    experiment.launch(do_train, do_test, nb_print_train,
+                      do_plot_train, do_save)

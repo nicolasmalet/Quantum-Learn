@@ -1,7 +1,6 @@
 /.idea/
 **/__pycache__/
 *.pyc
-/results/
 
 /mnist/
 pyproject.toml

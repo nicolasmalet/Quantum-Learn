@@ -1,4 +1,3 @@
-
 NB_CLASS = 2
 
 NB_PERIOD_TRAIN = 100

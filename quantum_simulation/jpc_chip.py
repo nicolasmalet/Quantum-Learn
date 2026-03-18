@@ -1,10 +1,11 @@
+import dynamiqs as dq
+import jax.numpy as jnp
+import numpy as np
+
+from .quadrature import Quadrature
 from .quantum_params import QuantumParams
 from .simulation_params import SimulationParams
-from .quadrature import Quadrature
 
-import jax.numpy as jnp
-import dynamiqs as dq
-import numpy as np
 
 class JpcChip:
     """

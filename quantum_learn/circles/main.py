@@ -1,10 +1,9 @@
-from .model import QuantumModelConfig
-from .data import create_data_circle
-from .configs import *
-
 from zeroth.losses import CrossEntropy
 from zeroth.utils.metrics import accuracy
 
+from .configs import *
+from .data import create_data_circle
+from .model import QuantumModelConfig
 
 Q_ModelConfig = QuantumModelConfig(
     name="Q_Model",
@@ -20,6 +19,7 @@ Q_ModelConfig = QuantumModelConfig(
     quantum_gradient_estimator=finite_difference,
     quantum_optimizer_config=zeroth_order_adam,
     quantum_network_config=quantum_network_config)
+
 
 def main():
     M = Q_ModelConfig.instantiate()

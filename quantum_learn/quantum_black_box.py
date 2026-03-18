@@ -1,13 +1,13 @@
-from zeroth.zeroth_order.zeroth_order_blackbox import ZerothOrderBlackBox
-from zeroth.zeroth_order.gradient_estimators import GradientEstimator
-
-from quantum_simulation.simulation_params import SimulationParams
-from quantum_simulation.quantum_params import QuantumParams
-from quantum_simulation.quadrature import Quadrature
-from quantum_simulation.jpc_chip import JpcChip
-
 from dataclasses import dataclass
+
 import numpy as np
+from zeroth.zeroth_order.gradient_estimators import GradientEstimator
+from zeroth.zeroth_order.zeroth_order_blackbox import ZerothOrderBlackBox
+
+from quantum_simulation.jpc_chip import JpcChip
+from quantum_simulation.quadrature import Quadrature
+from quantum_simulation.quantum_params import QuantumParams
+from quantum_simulation.simulation_params import SimulationParams
 
 
 @dataclass
@@ -23,7 +23,6 @@ class QuantumBlackBoxConfig:
 
 class QuantumBlackBox(ZerothOrderBlackBox):
     def __init__(self, config: QuantumBlackBoxConfig):
-
         self.name: str = config.name
         self.params = config.quantum_params
         self.nb_params = len(self.params)
@@ -73,4 +72,3 @@ class QuantumBlackBox(ZerothOrderBlackBox):
         Updates the sinus_vs_square parameters
         """
         self.params -= learning_rate * grad
-

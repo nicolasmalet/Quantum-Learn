@@ -1,17 +1,15 @@
-from zeroth.utils.activation_functions import softmax
-from zeroth import first_order
-from zeroth.zeroth_order.gradient_estimators import FiniteDifferenceConfig
-from zeroth.zeroth_order import ZerothOrderAdamConfig
-from zeroth.abstract import NeuralNetworkConfig, LayerConfig
-from quantum_learn.quantum_black_box import QuantumBlackBoxConfig
-
-
 import numpy as np
+from zeroth import first_order
+from zeroth.abstract import NeuralNetworkConfig, LayerConfig
+from zeroth.utils.activation_functions import softmax
+from zeroth.zeroth_order import ZerothOrderAdamConfig
+from zeroth.zeroth_order.gradient_estimators import FiniteDifferenceConfig
+
+from quantum_learn.quantum_black_box import QuantumBlackBoxConfig
 
 INPUT_DIM = 8
 OUTPUT_DIM = 2
 DEFAULT_PERTURBATION_SCALE = 0.01
-
 
 quantum_network_config = QuantumBlackBoxConfig(
     name="Q_Network",

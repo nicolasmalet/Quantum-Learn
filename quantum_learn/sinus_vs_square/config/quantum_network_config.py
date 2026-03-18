@@ -1,11 +1,9 @@
-from zeroth.zeroth_order.gradient_estimators import FiniteDifferenceConfig
-from zeroth.zeroth_order import ZerothOrderAdamConfig
-
-from ...quantum_black_box import QuantumBlackBoxConfig
-from .jpc_config import quantum_params, simulation_params
-
 import numpy as np
+from zeroth.zeroth_order import ZerothOrderAdamConfig
+from zeroth.zeroth_order.gradient_estimators import FiniteDifferenceConfig
 
+from .jpc_config import quantum_params, simulation_params
+from ...quantum_black_box import QuantumBlackBoxConfig
 
 quantum_network_config = QuantumBlackBoxConfig(
     name="Q_Network",
@@ -20,4 +18,3 @@ zeroth_order_adam = ZerothOrderAdamConfig(learning_rate=0.02,
                                           epsilon=1e-8)
 
 finite_difference: FiniteDifferenceConfig = FiniteDifferenceConfig(dA=0.01)
-

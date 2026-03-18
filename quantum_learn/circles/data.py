@@ -2,7 +2,8 @@ import numpy as np
 
 
 class DataSignal:
-    def __init__(self, raw_X_train: np.ndarray, raw_Y_train: np.ndarray, raw_X_test: np.ndarray, raw_Y_test: np.ndarray):
+    def __init__(self, raw_X_train: np.ndarray, raw_Y_train: np.ndarray, raw_X_test: np.ndarray,
+                 raw_Y_test: np.ndarray):
         self.input_dim: int = raw_X_train.shape[0]
         self.output_dim: int = raw_Y_train.shape[0]
         self.nb_data: int = raw_X_train.shape[1]
@@ -28,7 +29,6 @@ class DataSignal:
 
 
 def create_data_circle(nb_points_train: int, nb_points_test, r: float) -> DataSignal:
-
     X_train = np.random.uniform(0, 1, (2, nb_points_train))
     Y_train = (X_train[0, :] ** 2 + X_train[1, :] ** 2 < r ** 2).astype(np.int8)[None, :]
 

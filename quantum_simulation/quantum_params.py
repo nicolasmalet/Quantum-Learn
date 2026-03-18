@@ -1,7 +1,7 @@
 from dataclasses import dataclass
-import jax.numpy as jnp
+
 import dynamiqs as dq
-import numpy as np
+import jax.numpy as jnp
 
 
 @dataclass
@@ -55,7 +55,6 @@ class QuantumParams:
     DRIVE_DURATION: float
 
     def __post_init__(self):
-
         self.a = dq.destroy(self.DIM_A)
         self.a_dag = self.a.dag()
         self.N_a = self.a_dag @ self.a
@@ -63,20 +62,25 @@ class QuantumParams:
         self.b_dag = self.b.dag()
         self.N_b = self.b_dag @ self.b
 
-
         self.H_kerr_a = self.K_AA * self.N_a @ self.N_a
         self.H_kerr_b = self.K_BB * self.N_b @ self.N_b
         self.H_cross = - self.K_AB * dq.tensor(self.N_a, self.N_b)
-        self.H_kerr = dq.tensor(self.H_kerr_a, dq.eye(self.DIM_B)) + dq.tensor(dq.eye(self.DIM_A), self.H_kerr_b) + self.H_cross
+        self.H_kerr = dq.tensor(self.H_kerr_a, dq.eye(self.DIM_B)) + dq.tensor(dq.eye(self.DIM_A),
+                                                                               self.H_kerr_b) + self.H_cross
 
-        self.H_da = dq.tensor(1j * jnp.sqrt(self.KAPPA_A) * (self.EPSILON_A.conjugate() * self.a - self.EPSILON_A * self.a_dag), dq.eye(self.DIM_B))
-        self.H_db = dq.tensor(dq.eye(self.DIM_A), 1j * jnp.sqrt(self.KAPPA_B) * (self.EPSILON_B.conjugate() * self.b - self.EPSILON_B * self.b_dag))
+        self.H_da = dq.tensor(
+            1j * jnp.sqrt(self.KAPPA_A) * (self.EPSILON_A.conjugate() * self.a - self.EPSILON_A * self.a_dag),
+            dq.eye(self.DIM_B))
+        self.H_db = dq.tensor(dq.eye(self.DIM_A), 1j * jnp.sqrt(self.KAPPA_B) * (
+                    self.EPSILON_B.conjugate() * self.b - self.EPSILON_B * self.b_dag))
         self.Hd = self.H_da + self.H_db
 
-        self.vacuum_state = dq.tensor(dq.basis(self.DIM_A, 0), dq.basis(self.DIM_B, 0))  # états initiaux === vaccum states
+        self.vacuum_state = dq.tensor(dq.basis(self.DIM_A, 0),
+                                      dq.basis(self.DIM_B, 0))  # états initiaux === vaccum states
         self.jump_ops = [jnp.sqrt(self.KAPPA_A) * dq.tensor(self.a, dq.eye(self.DIM_B)),
-                    jnp.sqrt(self.KAPPA_B) * dq.tensor(dq.eye(self.DIM_A), self.b)]  # Opérateurs de dissipation
-        self.exp_ops = [dq.tensor(self.a, dq.eye(self.DIM_B)), dq.tensor(dq.eye(self.DIM_A), self.b)]  # Valeurs moyennes à calculer
+                         jnp.sqrt(self.KAPPA_B) * dq.tensor(dq.eye(self.DIM_A), self.b)]  # Opérateurs de dissipation
+        self.exp_ops = [dq.tensor(self.a, dq.eye(self.DIM_B)),
+                        dq.tensor(dq.eye(self.DIM_A), self.b)]  # Valeurs moyennes à calculer
 
     def H0(self, g_conv: float, g_sq: float):
         """
@@ -96,6 +100,3 @@ class QuantumParams:
         """
         return self.H_kerr + g_conv * (dq.tensor(self.a, self.b_dag) + dq.tensor(self.a_dag, self.b)) + g_sq * (
                 dq.tensor(self.a, self.b) + dq.tensor(self.a_dag, self.b_dag))
-
-
-
