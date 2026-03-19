@@ -1,11 +1,11 @@
-import dynamiqs as dq
+from quantum_params import QuantumParams
+from simulation_params import SimulationParams
+from quadrature import Quadrature
+from state_history import state_history
+
 import jax.numpy as jnp
+import dynamiqs as dq
 import numpy as np
-
-from .quadrature import Quadrature
-from .quantum_params import QuantumParams
-from .simulation_params import SimulationParams
-
 
 class JpcChip:
     """
@@ -40,9 +40,7 @@ class JpcChip:
         self.quantum_parameters = quantum_parameters
         self.simulation_params = simulation_params
 
-
-
-    def run_simulation(self, X: np.ndarray, params_G: np.ndarray, plot: bool = False) -> list[Quadrature]:
+    def run_simulation(self, X: np.ndarray, params_G: np.ndarray, plot: bool = False):
         """
         Entraîne la puce sur toutes les données
         -> résout l'équation de Lindblad drive après drive pour plusieurs valeurs possibles du couple
@@ -68,9 +66,6 @@ class JpcChip:
         """
 
         nb_simulations = len(params_G)
-
-        # Tableaux des features (sorties de la puce) -> Matrice de taille 64 x n_periodes
-
         time_interval = jnp.linspace(0, self.quantum_parameters.DRIVE_DURATION * len(X),
                                      self.simulation_params.SIMULATION_RESOLUTION * len(X))
         psi = self.quantum_parameters.vacuum_state
@@ -85,11 +80,11 @@ class JpcChip:
 
         result = dq.mesolve(H, self.quantum_parameters.jump_ops, psi, time_interval,
                             exp_ops=self.quantum_parameters.exp_ops,
-                            options=dq.Options(cartesian_batching=False, progress_meter=True, save_states=False))
+                            options=dq.Options(cartesian_batching=False, progress_meter=True, save_states=True))
 
-        Quadratures = [Quadrature(self.simulation_params, result.expects[i]) for i in range(nb_simulations)]
+        State_history = [state_history(self.simulation_params, self.quantum_parameters, result.expects[i], result.states[i], time_interval) for i in range(nb_simulations)]
 
         if plot:
-            Quadratures[0].plot()
+            State_history[0].quadratures.plot()
 
-        return Quadratures
+        return State_history

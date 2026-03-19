@@ -1,10 +1,11 @@
+from simulation_params import SimulationParams
+
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .simulation_params import SimulationParams
-
 
 class Quadrature:
+
     """
     Quadratures -> feature matrix
 
@@ -56,6 +57,7 @@ class Quadrature:
         L_Ib = self.L_Ib.reshape(nb_periods_per_batch, nb_points_per_period * self.params.MEASURE_RESOLUTION).T
         L_Qb = self.L_Qb.reshape(nb_periods_per_batch, nb_points_per_period * self.params.MEASURE_RESOLUTION).T
         return np.vstack((L_Ia, L_Qa, L_Ib, L_Qb))
+
 
     def plot(self) -> None:
         # Plot les quadratures en fonction du temps
