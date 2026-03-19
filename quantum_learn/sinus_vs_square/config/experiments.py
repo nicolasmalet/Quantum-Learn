@@ -7,6 +7,7 @@ from . import paths
 from .data_config import NB_POINTS_PER_PERIOD
 from .jpc_config import NB_QUADRATURES
 from .models import quantum_model_config
+from .quantum_network_config import null_gradient_estimator
 
 
 class VariationCatalog:
@@ -36,6 +37,12 @@ class VariationCatalog:
         values=[[0.001], [0.01], [0.1], [1]]
     )
 
+    null_gradient = VariationConfig(
+        name="No Quantum Learning",
+        param=[paths.GRADIENT_ESTIMATOR],
+        values=[[null_gradient_estimator]]
+    )
+
 
 VARIATIONS = VariationCatalog()
 
@@ -43,19 +50,37 @@ VARIATIONS = VariationCatalog()
 #  WARNING: some VariationConfig might overwrite others depending on the order of variations
 @dataclass(frozen=True)
 class ExperimentCatalog:
+    test_experiment: ExperimentConfig = ExperimentConfig(name="test_experiment",
+                                                         title="Measure Resolution",
+                                                         base_model=quantum_model_config,
+                                                         variations=[],
+                                                         create_data=create_data_sinus_vs_square,
+                                                         plot_dimension=0,
+                                                         smooth_fraction=0)
+
     measure_resolution: ExperimentConfig = ExperimentConfig(name="measure_resolution",
                                                             title="Measure Resolution",
                                                             base_model=quantum_model_config,
                                                             variations=[VARIATIONS.measure_resolution],
                                                             create_data=create_data_sinus_vs_square,
-                                                            plot_dimension=0)
+                                                            plot_dimension=0,
+                                                            smooth_fraction=0)
 
     quantum_lr: ExperimentConfig = ExperimentConfig(name="quantum_lr",
                                                     title="Training Loss vs Chip Parameters LR",
                                                     base_model=quantum_model_config,
                                                     variations=[VARIATIONS.quantum_lr],
                                                     create_data=create_data_sinus_vs_square,
-                                                    plot_dimension=1)
+                                                    plot_dimension=1,
+                                                    smooth_fraction=0)
+
+    no_quantum_learning: ExperimentConfig = ExperimentConfig(name="no_quantum_learning",
+                                                    title="Training loss vs no quantum learning",
+                                                    base_model=quantum_model_config,
+                                                    variations=[VARIATIONS.null_gradient],
+                                                    create_data=create_data_sinus_vs_square,
+                                                    plot_dimension=0,
+                                                    smooth_fraction=0)
 
 
 EXPERIMENTS = ExperimentCatalog()

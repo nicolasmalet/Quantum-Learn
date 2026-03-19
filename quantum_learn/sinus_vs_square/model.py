@@ -57,7 +57,7 @@ class QuantumModel(Model):
         """
         nb_batches = data.nb_periods // self.batch_size
 
-        self.train_loss = np.zeros(self.nb_epochs * nb_batches, dtype=np.float64)
+        self.training_loss = np.zeros(self.nb_epochs * nb_batches, dtype=np.float64)
 
         print_indexes = np.linspace(0, nb_batches - 1, nb_print).astype(int)
         print(f"    Training {self.id} Model")
@@ -67,11 +67,10 @@ class QuantumModel(Model):
             for batch_idx in range(nb_batches):
                 X_train, Y_train = data.X_train[batch_idx], data.Y_train[batch_idx]
 
-                Quadratures = self.quantum_network.forward_perturbed(X_train,
-                                                                     self.quantum_gradient_estimator)  # shape (3, out, nb_points)
+                Quadratures = self.quantum_network.forward_perturbed(X_train, self.quantum_gradient_estimator)
                 pF_pred = np.stack(
                     [Q.build_F(data.nb_periods_per_batch, data.nb_points_per_period) for Q in Quadratures], axis=0)
-                pY_pred = self.neural_network.forward(pF_pred)  # shape (nb_params + 1, out, nb_points)
+                pY_pred = self.neural_network.forward(pF_pred)
                 avg_loss, pLoss = self.loss.compute_losses_for_zeroth_order(pY_pred, Y_train)
 
                 gradient = self.quantum_gradient_estimator.get_gradient(pLoss)
@@ -80,11 +79,11 @@ class QuantumModel(Model):
                 self.neural_network_optimizer.do_descent(self.neural_network, self.loss, F, Y_train)
                 self.quantum_optimizer.update_params(self.quantum_network, gradient)
 
-                self.train_loss[epoch_idx * nb_batches + batch_idx] = avg_loss
+                self.training_loss[epoch_idx * nb_batches + batch_idx] = avg_loss
 
                 if batch_idx in print_indexes:
                     print(f"            batch n°{batch_idx + 1} out of {nb_batches}, "
-                          f"loss : {self.train_loss[epoch_idx * nb_batches + batch_idx]}",
+                          f"loss : {self.training_loss[epoch_idx * nb_batches + batch_idx]}",
                           f"q_params : {self.quantum_network.params}")
 
     def test(self, data: DataSignal) -> None:

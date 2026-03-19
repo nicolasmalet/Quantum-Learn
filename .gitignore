@@ -2,7 +2,7 @@
 **/__pycache__/
 *.pyc
 
-/mnist/
+/experiments/
 pyproject.toml
 
 get_structure.py

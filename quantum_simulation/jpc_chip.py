@@ -40,6 +40,8 @@ class JpcChip:
         self.quantum_parameters = quantum_parameters
         self.simulation_params = simulation_params
 
+
+
     def run_simulation(self, X: np.ndarray, params_G: np.ndarray, plot: bool = False) -> list[Quadrature]:
         """
         Entraîne la puce sur toutes les données
