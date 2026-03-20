@@ -1,5 +1,7 @@
 import numpy as np
+
 from .task_constants import NB_POINTS_PER_PERIOD
+
 
 class DataSignal:
     def __init__(self, raw_X_train: np.ndarray, raw_Y_train: np.ndarray, raw_X_test: np.ndarray,

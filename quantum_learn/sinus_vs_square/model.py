@@ -67,9 +67,7 @@ class QuantumModel(Model):
             for batch_idx in range(nb_batches):
                 X_train, Y_train = data.X_train[batch_idx], data.Y_train[batch_idx]
 
-                Quadratures = self.quantum_network.forward_perturbed(X_train, self.quantum_gradient_estimator)
-                pF_pred = np.stack(
-                    [Q.build_F(data.nb_periods_per_batch, data.nb_points_per_period) for Q in Quadratures], axis=0)
+                pF_pred = self.quantum_network.forward_perturbed(X_train, self.quantum_gradient_estimator)
                 pY_pred = self.neural_network.forward(pF_pred)
                 avg_loss, pLoss = self.loss.compute_losses_for_zeroth_order(pY_pred, Y_train)
 
@@ -88,8 +86,7 @@ class QuantumModel(Model):
 
     def test(self, data: DataSignal) -> None:
         X_test, Y_true = data.X_test, data.Y_test
-        Quadrature = self.quantum_network.forward(X_test)[0]
-        F_pred = Quadrature.build_F(data.nb_periods_per_batch, data.nb_points_per_period)
+        F_pred = self.quantum_network.forward(X_test)[0]
         Y_pred = self.neural_network.forward(F_pred)
 
         self.test_accuracy = self.metric(Y_pred, Y_true)

@@ -4,10 +4,10 @@ from zeroth.experiment import ExperimentConfig, VariationConfig
 
 from quantum_learn.sinus_vs_square.data import create_data_sinus_vs_square
 from . import paths
-from .data_config import NB_POINTS_PER_PERIOD
 from .jpc_config import nb_quadratures
 from .models import quantum_model_config, no_quantum_learning_model
 from .quantum_network_config import null_gradient_estimator
+from ..task_constants import NB_POINTS_PER_PERIOD
 
 
 class VariationCatalog:
