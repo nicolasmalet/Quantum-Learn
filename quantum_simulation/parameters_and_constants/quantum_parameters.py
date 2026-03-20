@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, fields
 
 import numpy as np
@@ -15,6 +17,7 @@ class QuantumParameters:
         for field, value in zip(fields(self), array):
             setattr(self, field.name, value)
 
-    def __isub__(self, array: np.ndarray):
+    def __isub__(self, array: np.ndarray) -> QuantumParameters:
         for field, value in zip(fields(self), array):
             setattr(self, field.name, getattr(self, field.name) - value)
+        return self

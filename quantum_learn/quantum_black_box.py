@@ -76,5 +76,3 @@ class QuantumBlackBox(ZerothOrderBlackBox):
         Updates the sinus_vs_square parameters
         """
         self.params -= learning_rate * grad
-
-
