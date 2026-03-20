@@ -1,6 +1,6 @@
 from quantum_simulation.parameters_and_constants.quantum_constants import QuantumConstants
 from quantum_simulation.parameters_and_constants.simulation_constants import SimulationConstants
-from .data_config import measure_resolution, simulation_resolution
+from lab.sinus_vs_square_hard.config.data_config import measure_resolution, simulation_resolution
 
 nb_quadratures = 4
 

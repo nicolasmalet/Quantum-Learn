@@ -3,7 +3,7 @@ from zeroth.abstract import NeuralNetworkConfig, LayerConfig
 from zeroth.utils.activation_functions import softmax
 
 from .data_config import *
-from .jpc_config import nb_quadratures
+from quantum_simulation.jpc_config import nb_quadratures
 from ..task_constants import NB_CLASS
 
 input_dim = nb_quadratures * measure_resolution

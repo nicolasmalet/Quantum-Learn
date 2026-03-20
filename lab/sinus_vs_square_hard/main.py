@@ -1,4 +1,4 @@
-from .config.experiments import EXPERIMENTS
+from lab.sinus_vs_square_hard.experiments import EXPERIMENTS
 
 
 def main(do_train, do_test, nb_print_train, do_plot_train, do_save):

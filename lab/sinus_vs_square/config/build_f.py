@@ -2,7 +2,7 @@ import numpy as np
 
 from quantum_simulation.history import StateHistory
 from quantum_simulation.parameters_and_constants import SimulationConstants
-from .jpc_config import nb_quadratures
+from quantum_simulation.jpc_config import nb_quadratures
 from ..task_constants import NB_POINTS_PER_PERIOD
 
 

@@ -1,6 +1,6 @@
 import numpy as np
 
-from .task_constants import NB_POINTS_PER_PERIOD
+from lab.sinus_vs_square_hard.task_constants import NB_POINTS_PER_PERIOD
 from quantum_learn.types import Array
 
 

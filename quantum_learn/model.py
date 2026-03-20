@@ -6,7 +6,7 @@ from zeroth.first_order import FirstOrderOptimizer, FirstOrderNeuralNetwork, Fir
 from zeroth.zeroth_order import ZerothOrderOptimizer, GradientEstimator, GradientEstimatorConfig, \
     ZerothOrderOptimizerConfig
 
-from .data import DataSignal
+from quantum_learn.data import DataSignal
 from quantum_learn.quantum_black_box import QuantumBlackBox, QuantumBlackBoxConfig
 
 
