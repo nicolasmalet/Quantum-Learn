@@ -33,7 +33,7 @@ class DataSignal:
         self.Y_train = np.reshape(self.raw_Y_train, (-1, 1, self.batch_size))
 
 
-def create_data_sinus_vs_square(nb_periods_train: int = 100, nb_periods_test: int = 10) -> DataSignal:
+def create_data(nb_periods_train: int = 100, nb_periods_test: int = 10) -> DataSignal:
     sinus = np.array([-0.7, 0, 0.7, 1, 0.7, 0, -0.7, -1])
     square = np.array([1, 1, 1, 1, -1, -1, -1, -1])
 

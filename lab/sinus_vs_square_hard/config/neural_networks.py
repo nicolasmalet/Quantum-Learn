@@ -4,9 +4,9 @@ from zeroth.utils.activation_functions import softmax
 
 from .data_config import *
 from .jpc_config import nb_quadratures
-from ..task_constants import NB_POINTS_PER_PERIOD, NB_CLASS
+from ..task_constants import NB_CLASS
 
-input_dim = nb_quadratures * NB_POINTS_PER_PERIOD * measure_resolution
+input_dim = nb_quadratures * measure_resolution
 output_dim = NB_CLASS
 
 linear: NeuralNetworkConfig = NeuralNetworkConfig(

@@ -8,7 +8,7 @@ from quantum_simulation.jpc_chip import JpcChip
 from quantum_simulation.parameters_and_constants.quantum_constants import QuantumConstants
 from quantum_simulation.parameters_and_constants.quantum_parameters import QuantumParameters
 from quantum_simulation.parameters_and_constants.simulation_constants import SimulationConstants
-from .types import BuildF
+from quantum_learn.types import BuildF
 
 
 @dataclass

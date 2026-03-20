@@ -7,7 +7,7 @@ from zeroth.zeroth_order import ZerothOrderOptimizer, GradientEstimator, Gradien
     ZerothOrderOptimizerConfig
 
 from .data import DataSignal
-from ..quantum_black_box import QuantumBlackBox, QuantumBlackBoxConfig
+from quantum_learn.quantum_black_box import QuantumBlackBox, QuantumBlackBoxConfig
 
 
 @dataclass(frozen=True)
@@ -53,7 +53,7 @@ class QuantumModel(Model):
             nb_print (int): Number of progress updates to print per epoch.
 
         Returns:
-            np.ndarray: Array of loss values recorded at each step (for plotting).
+            Array: Array of loss values recorded at each step (for plotting).
         """
         nb_batches = data.nb_periods // self.batch_size
 
@@ -69,6 +69,7 @@ class QuantumModel(Model):
 
                 pF_pred = self.quantum_network.forward_perturbed(X_train, self.quantum_gradient_estimator)
                 pY_pred = self.neural_network.forward(pF_pred)
+
                 avg_loss, pLoss = self.loss.compute_losses_for_zeroth_order(pY_pred, Y_train)
 
                 gradient = self.quantum_gradient_estimator.get_gradient(pLoss)

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from zeroth.experiment import ExperimentConfig, VariationConfig
 
-from quantum_learn.sinus_vs_square.data import create_data_sinus_vs_square
+from lab.sinus_vs_square.data import create_data
 from . import paths
 from .jpc_config import nb_quadratures
 from .models import quantum_model_config, no_quantum_learning_model
@@ -54,7 +54,7 @@ class ExperimentCatalog:
                                                          title="Measure Resolution",
                                                          base_model=quantum_model_config,
                                                          variations=[],
-                                                         create_data=create_data_sinus_vs_square,
+                                                         create_data=create_data,
                                                          plot_dimension=0,
                                                          smooth_fraction=0)
 
@@ -62,7 +62,7 @@ class ExperimentCatalog:
                                                             title="Measure Resolution",
                                                             base_model=quantum_model_config,
                                                             variations=[VARIATIONS.measure_resolution],
-                                                            create_data=create_data_sinus_vs_square,
+                                                            create_data=create_data,
                                                             plot_dimension=0,
                                                             smooth_fraction=0)
 
@@ -70,7 +70,7 @@ class ExperimentCatalog:
                                                     title="Training Loss vs Chip Parameters LR",
                                                     base_model=quantum_model_config,
                                                     variations=[VARIATIONS.quantum_lr],
-                                                    create_data=create_data_sinus_vs_square,
+                                                    create_data=create_data,
                                                     plot_dimension=1,
                                                     smooth_fraction=0)
 
@@ -78,7 +78,7 @@ class ExperimentCatalog:
                                                              title="Training loss vs no quantum learning",
                                                              base_model=no_quantum_learning_model,
                                                              variations=[],
-                                                             create_data=create_data_sinus_vs_square,
+                                                             create_data=create_data,
                                                              plot_dimension=0,
                                                              smooth_fraction=0)
 
