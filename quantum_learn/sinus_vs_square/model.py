@@ -96,7 +96,3 @@ class QuantumModel(Model):
         self.test_loss = self.loss.compute_loss(Y_pred, Y_true)
 
         print(f"    {self.id} accuracy : {self.test_accuracy}, loss : {self.test_loss}")
-
-    def print_params(self) -> None:
-        self.quantum_network.print_params()
-        self.neural_network.print_params()

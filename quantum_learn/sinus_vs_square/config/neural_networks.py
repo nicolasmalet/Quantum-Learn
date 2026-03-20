@@ -3,14 +3,16 @@ from zeroth.abstract import NeuralNetworkConfig, LayerConfig
 from zeroth.utils.activation_functions import softmax
 
 from .data_config import *
-from .jpc_config import NB_QUADRATURES
+from .jpc_config import nb_quadratures
+from ..task_constants import NB_POINTS_PER_PERIOD, NB_CLASS
 
-INPUT_DIM = NB_QUADRATURES * NB_POINTS_PER_PERIOD * MEASURE_RESOLUTION
-OUTPUT_DIM = NB_CLASS
+
+input_dim = nb_quadratures * NB_POINTS_PER_PERIOD * measure_resolution
+output_dim = NB_CLASS
 
 linear: NeuralNetworkConfig = NeuralNetworkConfig(
     name="Linear",
-    layers_config=[LayerConfig(input_dim=INPUT_DIM, output_dim=OUTPUT_DIM, f=softmax)]
+    layers_config=[LayerConfig(input_dim=input_dim, output_dim=output_dim, f=softmax)]
 )
 
 first_order_adam = first_order.FirstOrderAdamConfig(learning_rate=0.02,

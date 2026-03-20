@@ -1,10 +1,10 @@
-from quantum_simulation.quantum_params import QuantumParams
-from quantum_simulation.simulation_params import SimulationParams
-from .data_config import MEASURE_RESOLUTION
+from quantum_simulation.parameters_and_constants.quantum_constants import QuantumConstants
+from quantum_simulation.parameters_and_constants.simulation_constants import SimulationConstants
+from .data_config import measure_resolution, simulation_resolution
 
-NB_QUADRATURES = 4
+nb_quadratures = 4
 
-quantum_params = QuantumParams(
+quantum_constants = QuantumConstants(
     DIM_A=15,
     DIM_B=15,
     OMEGA_A=1e4,
@@ -19,5 +19,5 @@ quantum_params = QuantumParams(
     DRIVE_DURATION=0.05
 )
 
-simulation_params = SimulationParams(MEASURE_RESOLUTION=MEASURE_RESOLUTION,
-                                     SIMULATION_RESOLUTION=MEASURE_RESOLUTION)
+simulation_constants = SimulationConstants(MEASURE_RESOLUTION=measure_resolution,
+                                           SIMULATION_RESOLUTION=simulation_resolution)

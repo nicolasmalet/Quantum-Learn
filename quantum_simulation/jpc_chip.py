@@ -1,11 +1,12 @@
-from quantum_params import QuantumParams
-from simulation_params import SimulationParams
-from quadrature import Quadrature
-from state_history import state_history
-
-import jax.numpy as jnp
 import dynamiqs as dq
+import jax.numpy as jnp
 import numpy as np
+
+from quantum_simulation.history.state_history import StateHistory
+from quantum_simulation.parameters_and_constants.quantum_constants import QuantumConstants
+from quantum_simulation.parameters_and_constants.quantum_parameters import QuantumParameters
+from quantum_simulation.parameters_and_constants.simulation_constants import SimulationConstants
+
 
 class JpcChip:
     """
@@ -36,11 +37,11 @@ class JpcChip:
     Cohen-Tannoudji, Quantum Mechanics Vol. 2.
     """  # résolution des simulations Dynamiqs
 
-    def __init__(self, quantum_parameters: QuantumParams, simulation_params: SimulationParams):
-        self.quantum_parameters = quantum_parameters
+    def __init__(self, quantum_constants: QuantumConstants, simulation_params: SimulationConstants):
+        self.quantum_constants = quantum_constants
         self.simulation_params = simulation_params
 
-    def run_simulation(self, X: np.ndarray, params_G: np.ndarray, plot: bool = False):
+    def run_simulation(self, X: np.ndarray, quantum_parameters_list: list[QuantumParameters]) -> list[StateHistory]:
         """
         Entraîne la puce sur toutes les données
         -> résout l'équation de Lindblad drive après drive pour plusieurs valeurs possibles du couple
@@ -50,11 +51,7 @@ class JpcChip:
         ----------
         X : jnp.ndarray
             données d'entraînement encodées en amplitude du drive
-        params_G : np.ndarray
-            array des valeurs du couple (g_conv, g_sq)
-            i.e. [(g1, g2), (g1 + dg1, g2), (g1, g2 + dg2)]
-        plot: bool (optional)
-            si True, plot les quadratures
+        quantum_parameters_list : list[QuantumParameters]
         Returns
         -------
         F1 : np.array of shape 64 x len(X)
@@ -65,26 +62,22 @@ class JpcChip:
             Feature matrix for the simulation 3
         """
 
-        nb_simulations = len(params_G)
-        time_interval = jnp.linspace(0, self.quantum_parameters.DRIVE_DURATION * len(X),
+        nb_simulations = len(quantum_parameters_list)
+        time_interval = jnp.linspace(0, self.quantum_constants.DRIVE_DURATION * len(X),
                                      self.simulation_params.SIMULATION_RESOLUTION * len(X))
-        psi = self.quantum_parameters.vacuum_state
+        psi = self.quantum_constants.vacuum_state
         tab_data = np.repeat(X, self.simulation_params.SIMULATION_RESOLUTION)[:-1]
 
-        H_drive = dq.pwc(time_interval, tab_data, self.quantum_parameters.Hd)
+        H_drive = dq.pwc(time_interval, tab_data, self.quantum_constants.Hd)
         H0s = dq.stack([
-            self.quantum_parameters.H0(g_conv, g_sq)
-            for g_conv, g_sq in params_G
+            self.quantum_constants.H0(quantum_parameters.g_conv, quantum_parameters.g_sq)
+            for quantum_parameters in quantum_parameters_list
         ])
         H = H0s + H_drive
 
-        result = dq.mesolve(H, self.quantum_parameters.jump_ops, psi, time_interval,
-                            exp_ops=self.quantum_parameters.exp_ops,
+        result = dq.mesolve(H, self.quantum_constants.jump_ops, psi, time_interval,
+                            exp_ops=self.quantum_constants.exp_ops,
                             options=dq.Options(cartesian_batching=False, progress_meter=True, save_states=True))
 
-        State_history = [state_history(self.simulation_params, self.quantum_parameters, result.expects[i], result.states[i], time_interval) for i in range(nb_simulations)]
-
-        if plot:
-            State_history[0].quadratures.plot()
-
-        return State_history
+        return [StateHistory(self.simulation_params, self.quantum_constants, result.expects[i], result.states[i],
+                             time_interval) for i in range(nb_simulations)]

@@ -1,9 +1,8 @@
-NB_CLASS = 2
+from quantum_learn.sinus_vs_square.config.jpc_config import simulation_constants
 
-NB_PERIOD_TRAIN = 100
-NB_PERIOD_TEST = 10
-NB_POINTS_PER_PERIOD = 8
-MEASURE_RESOLUTION = 10
-
-BATCH_SIZE = 10
-NB_EPOCHS = 1
+nb_period_train = 100
+nb_period_test = 10
+measure_resolution = 10
+simulation_resolution = 10
+batch_size = 10
+nb_epochs = 1

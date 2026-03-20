@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 
-@dataclass
-class SimulationParams:
+@dataclass(frozen=True)
+class SimulationConstants:
     MEASURE_RESOLUTION: int
     SIMULATION_RESOLUTION: int

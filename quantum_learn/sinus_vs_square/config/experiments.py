@@ -5,8 +5,8 @@ from zeroth.experiment import ExperimentConfig, VariationConfig
 from quantum_learn.sinus_vs_square.data import create_data_sinus_vs_square
 from . import paths
 from .data_config import NB_POINTS_PER_PERIOD
-from .jpc_config import NB_QUADRATURES
-from .models import quantum_model_config
+from .jpc_config import nb_quadratures
+from .models import quantum_model_config, no_quantum_learning_model
 from .quantum_network_config import null_gradient_estimator
 
 
@@ -26,9 +26,9 @@ class VariationCatalog:
     measure_resolution = VariationConfig(
         name="Measure Resolution",
         param=[paths.MEASURE_RESOLUTION, paths.INPUT_DIM, paths.SIMULATION_RESOLUTION],
-        values=[[1, NB_QUADRATURES * NB_POINTS_PER_PERIOD * 1, 100],
-                [10, NB_QUADRATURES * NB_POINTS_PER_PERIOD * 10, 100],
-                [100, NB_QUADRATURES * NB_POINTS_PER_PERIOD * 100, 100]]
+        values=[[1, nb_quadratures * NB_POINTS_PER_PERIOD * 1, 100],
+                [10, nb_quadratures * NB_POINTS_PER_PERIOD * 10, 100],
+                [100, nb_quadratures * NB_POINTS_PER_PERIOD * 100, 100]]
     )
 
     quantum_lr = VariationConfig(
@@ -75,12 +75,12 @@ class ExperimentCatalog:
                                                     smooth_fraction=0)
 
     no_quantum_learning: ExperimentConfig = ExperimentConfig(name="no_quantum_learning",
-                                                    title="Training loss vs no quantum learning",
-                                                    base_model=quantum_model_config,
-                                                    variations=[VARIATIONS.null_gradient],
-                                                    create_data=create_data_sinus_vs_square,
-                                                    plot_dimension=0,
-                                                    smooth_fraction=0)
+                                                             title="Training loss vs no quantum learning",
+                                                             base_model=no_quantum_learning_model,
+                                                             variations=[],
+                                                             create_data=create_data_sinus_vs_square,
+                                                             plot_dimension=0,
+                                                             smooth_fraction=0)
 
 
 EXPERIMENTS = ExperimentCatalog()
