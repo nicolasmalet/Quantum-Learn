@@ -1,6 +1,6 @@
-from quantum_simulation.parameters_and_constants.quantum_constants import QuantumConstants
-from quantum_simulation.parameters_and_constants.simulation_constants import SimulationConstants
-from lab.sinus_vs_square_hard.config.data_config import measure_resolution, simulation_resolution
+from .parameters_and_constants.quantum_constants import QuantumConstants
+from .parameters_and_constants.simulation_constants import SimulationConstants
+
 
 nb_quadratures = 4
 
@@ -19,5 +19,5 @@ quantum_constants = QuantumConstants(
     DRIVE_DURATION=0.05
 )
 
-simulation_constants = SimulationConstants(MEASURE_RESOLUTION=measure_resolution,
-                                           SIMULATION_RESOLUTION=simulation_resolution)
+simulation_constants = SimulationConstants(MEASURE_RESOLUTION=10,
+                                           SIMULATION_RESOLUTION=10)

@@ -34,7 +34,7 @@ class DataSignal:
         self.Y_train = np.reshape(self.raw_Y_train, (-1, 1, NB_POINTS_PER_PERIOD * self.batch_size))
 
 
-def create_data(nb_periods_train: int = 100, nb_periods_test: int = 10) -> DataSignal:
+def create_data(nb_periods_train: int = 1000, nb_periods_test: int = 10) -> DataSignal:
     sinus = np.array([-0.7, 0, 0.7, 1, 0.7, 0, -0.7, -1])
     square = np.array([1, 1, 1, 1, -1, -1, -1, -1])
 
@@ -52,6 +52,7 @@ def create_data(nb_periods_train: int = 100, nb_periods_test: int = 10) -> DataS
     for i in range(nb_periods_test):
         X_test[NB_POINTS_PER_PERIOD * i: NB_POINTS_PER_PERIOD * (i + 1)] = sinus if Y_test[i] == 1 else square
 
-    Y_test = Y_train.repeat(NB_POINTS_PER_PERIOD)[None, :]
+    Y_test = Y_test.repeat(NB_POINTS_PER_PERIOD)[None, :]
 
     return DataSignal(X_train, Y_train, X_test, Y_test)
+

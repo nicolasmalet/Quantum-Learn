@@ -6,7 +6,7 @@ from .build_f import build_F_Quadratures
 from quantum_simulation.jpc_config import quantum_constants, simulation_constants
 from quantum_learn.quantum_black_box import QuantumBlackBoxConfig
 
-quantum_parameters = QuantumParameters(g_conv=50, g_sq=50)
+quantum_parameters = QuantumParameters(g_conv=50, g_sq=20)
 nb_chip_variables = 2
 
 quantum_network_config = QuantumBlackBoxConfig(
@@ -17,7 +17,7 @@ quantum_network_config = QuantumBlackBoxConfig(
     build_F=build_F_Quadratures
 )
 
-zeroth_order_adam = ZerothOrderAdamConfig(learning_rate=0.02,
+zeroth_order_adam = ZerothOrderAdamConfig(learning_rate=1,
                                           beta1=0.9,
                                           beta2=0.99,
                                           epsilon=1e-8)

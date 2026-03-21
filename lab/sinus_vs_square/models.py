@@ -7,6 +7,7 @@ from lab.sinus_vs_square.config.quantum_network_config import finite_difference,
     null_gradient_estimator
 from quantum_learn.model import QuantumModelConfig
 
+
 quantum_model_config = QuantumModelConfig(
     name="Quantum Model",
     id={},

@@ -1,9 +1,9 @@
 from zeroth.losses import CrossEntropy
 from zeroth.utils.metrics import accuracy
 
-from lab.sinus_vs_square_hard.config.data_config import batch_size, nb_epochs
-from lab.sinus_vs_square_hard.config.neural_networks import linear, first_order_adam
-from lab.sinus_vs_square_hard.config.quantum_network_config import finite_difference, zeroth_order_adam, quantum_network_config, \
+from .config.data_config import batch_size, nb_epochs
+from .config.neural_networks import linear, first_order_adam
+from .config.quantum_network_config import finite_difference, zeroth_order_adam, quantum_network_config, \
     null_gradient_estimator
 from quantum_learn.model import QuantumModelConfig
 

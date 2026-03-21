@@ -2,12 +2,12 @@ from dataclasses import dataclass
 
 from zeroth.experiment import ExperimentConfig, VariationConfig
 
-from quantum_learn.data import create_data
-from quantum_learnh import paths
+from .data import create_data
+from quantum_learn import paths
 from quantum_simulation.jpc_config import nb_quadratures
-from lab.sinus_vs_square_hard.models import quantum_model_config, no_quantum_learning_model
-from lab.sinus_vs_square_hard.config.quantum_network_config import null_gradient_estimator
-from lab.sinus_vs_square_hard.task_constants import NB_POINTS_PER_PERIOD
+from .models import quantum_model_config, no_quantum_learning_model
+from .config.quantum_network_config import null_gradient_estimator
+from .task_constants import NB_POINTS_PER_PERIOD
 
 
 class VariationCatalog:
@@ -34,7 +34,7 @@ class VariationCatalog:
     quantum_lr = VariationConfig(
         name="quantum_lr",
         param=[paths.QUANTUM_LR],
-        values=[[0.001], [0.01], [0.1], [1]]
+        values=[[0.03], [0.1], [0.3], [1]]
     )
 
     null_gradient = VariationConfig(

@@ -6,7 +6,7 @@ from zeroth.first_order import FirstOrderOptimizer, FirstOrderNeuralNetwork, Fir
 from zeroth.zeroth_order import ZerothOrderOptimizer, GradientEstimator, GradientEstimatorConfig, \
     ZerothOrderOptimizerConfig
 
-from quantum_learn.data import DataSignal
+from lab.sinus_vs_square_hard.data import DataSignal
 from quantum_learn.quantum_black_box import QuantumBlackBox, QuantumBlackBoxConfig
 
 
@@ -87,7 +87,7 @@ class QuantumModel(Model):
 
     def test(self, data: DataSignal) -> None:
         X_test, Y_true = data.X_test, data.Y_test
-        F_pred = self.quantum_network.forward(X_test)[0]
+        F_pred = self.quantum_network.forward(X_test)
         Y_pred = self.neural_network.forward(F_pred)
 
         self.test_accuracy = self.metric(Y_pred, Y_true)

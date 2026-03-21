@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from quantum_simulation.parameters_and_constants.simulation_constants import SimulationConstants
+from ..parameters_and_constants.simulation_constants import SimulationConstants
 
 
 class Quadratures:

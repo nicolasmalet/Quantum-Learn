@@ -2,10 +2,10 @@ import dynamiqs as dq
 import jax.numpy as jnp
 import numpy as np
 
-from quantum_simulation.history.state_history import StateHistory
-from quantum_simulation.parameters_and_constants.quantum_constants import QuantumConstants
-from quantum_simulation.parameters_and_constants.quantum_parameters import QuantumParameters
-from quantum_simulation.parameters_and_constants.simulation_constants import SimulationConstants
+from .history.state_history import StateHistory
+from .parameters_and_constants.quantum_constants import QuantumConstants
+from .parameters_and_constants.quantum_parameters import QuantumParameters
+from .parameters_and_constants.simulation_constants import SimulationConstants
 
 
 class JpcChip:
