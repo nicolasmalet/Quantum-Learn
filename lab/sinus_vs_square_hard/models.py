@@ -2,7 +2,7 @@ from zeroth.losses import CrossEntropy
 from zeroth.utils.metrics import accuracy
 
 from .config.data_config import batch_size, nb_epochs
-from .config.neural_networks import linear, first_order_adam
+from .config.neural_networks import linear, XS, first_order_adam
 from .config.quantum_network_config import finite_difference, zeroth_order_adam, quantum_network_config, \
     null_gradient_estimator
 from quantum_learn.model import QuantumModelConfig
@@ -15,7 +15,7 @@ quantum_model_config = QuantumModelConfig(
     batch_size=batch_size,
     nb_epochs=nb_epochs,
 
-    neural_network_config=linear,
+    neural_network_config=XS,
     neural_network_optimizer_config=first_order_adam,
 
     quantum_gradient_estimator=finite_difference,
@@ -30,9 +30,11 @@ no_quantum_learning_model = QuantumModelConfig(
     batch_size=batch_size,
     nb_epochs=nb_epochs,
 
-    neural_network_config=linear,
+    neural_network_config=XS,
     neural_network_optimizer_config=first_order_adam,
 
     quantum_gradient_estimator=null_gradient_estimator,
     quantum_optimizer_config=zeroth_order_adam,
     quantum_network_config=quantum_network_config)
+
+

@@ -6,8 +6,6 @@ from quantum_simulation.jpc_config import nb_quadratures
 from quantum_learn.types import Array
 
 
-
-
 def build_F_Quadratures(state_history: StateHistory, simulation_constants: SimulationConstants) -> Array:
     """
     Construit la feature matrix selon la bonne notation

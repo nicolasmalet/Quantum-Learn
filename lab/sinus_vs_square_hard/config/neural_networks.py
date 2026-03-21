@@ -1,6 +1,6 @@
 from zeroth import first_order
 from zeroth.abstract import NeuralNetworkConfig, LayerConfig
-from zeroth.utils.activation_functions import softmax
+from zeroth.utils.activation_functions import softmax, relu
 
 from .data_config import *
 from quantum_simulation.jpc_config import nb_quadratures
@@ -12,6 +12,12 @@ output_dim = NB_CLASS
 linear: NeuralNetworkConfig = NeuralNetworkConfig(
     name="Linear",
     layers_config=[LayerConfig(input_dim=input_dim, output_dim=output_dim, f=softmax)]
+)
+
+XS: NeuralNetworkConfig = NeuralNetworkConfig(
+    name="Linear",
+    layers_config=[LayerConfig(input_dim=input_dim, output_dim=input_dim, f=relu),
+                   LayerConfig(input_dim=input_dim, output_dim=output_dim, f=softmax)]
 )
 
 first_order_adam = first_order.FirstOrderAdamConfig(learning_rate=0.02,
