@@ -3,9 +3,10 @@ from zeroth.abstract import NeuralNetworkConfig, LayerConfig
 from zeroth.utils.activation_functions import softmax
 
 from .data_config import *
-from quantum_simulation.jpc_config import nb_quadratures
 from ..task_constants import NB_CLASS, NB_POINTS_PER_PERIOD
 
+
+nb_quadratures = 4
 input_dim = nb_quadratures * NB_POINTS_PER_PERIOD * measure_resolution
 output_dim = NB_CLASS
 

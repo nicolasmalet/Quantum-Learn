@@ -3,10 +3,10 @@ from zeroth.utils.metrics import accuracy
 
 from lab.sinus_vs_square.config.data_config import batch_size, nb_epochs
 from lab.sinus_vs_square.config.neural_networks import linear, first_order_adam
-from lab.sinus_vs_square.config.quantum_network_config import finite_difference, zeroth_order_adam, quantum_network_config, \
+from lab.sinus_vs_square.config.quantum_network_config import finite_difference, zeroth_order_adam, \
+    quantum_network_config, \
     null_gradient_estimator
 from quantum_learn.model import QuantumModelConfig
-
 
 quantum_model_config = QuantumModelConfig(
     name="Quantum Model",

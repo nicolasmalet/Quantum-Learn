@@ -2,7 +2,6 @@ import numpy as np
 
 from quantum_simulation.history import StateHistory
 from quantum_simulation.parameters_and_constants import SimulationConstants
-from quantum_simulation.jpc_config import nb_quadratures
 from ..task_constants import NB_POINTS_PER_PERIOD
 
 
@@ -15,6 +14,7 @@ def build_F_Quadratures(state_history: StateHistory, simulation_constants: Simul
     F : np.ndarray
         Feature matrix F(X)
     """
+    nb_quadratures = 4
     step = simulation_constants.SIMULATION_RESOLUTION // simulation_constants.MEASURE_RESOLUTION
     input_dim = nb_quadratures * NB_POINTS_PER_PERIOD * simulation_constants.MEASURE_RESOLUTION
 

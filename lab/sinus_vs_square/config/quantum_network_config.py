@@ -1,12 +1,12 @@
 from zeroth.zeroth_order import ZerothOrderAdamConfig
 from zeroth.zeroth_order.gradient_estimators import FiniteDifferenceConfig, NullGradientEstimatorConfig
 
-from quantum_simulation.parameters_and_constants import QuantumParameters
-from .build_f import build_F_Quadratures
-from quantum_simulation.jpc_config import quantum_constants, simulation_constants
 from quantum_learn.quantum_black_box import QuantumBlackBoxConfig
+from quantum_simulation.jpc_config import quantum_constants, simulation_constants
+from quantum_simulation.parameters_and_constants import QuantumParametersConfig
+from .build_f import build_F_Quadratures
 
-quantum_parameters = QuantumParameters(g_conv=50, g_sq=50)
+quantum_parameters = QuantumParametersConfig(g_conv=50, g_sq=50)
 nb_chip_variables = 2
 
 quantum_network_config = QuantumBlackBoxConfig(

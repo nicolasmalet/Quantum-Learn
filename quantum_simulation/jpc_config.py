@@ -1,7 +1,6 @@
 from .parameters_and_constants.quantum_constants import QuantumConstants
 from .parameters_and_constants.simulation_constants import SimulationConstants
 
-
 nb_quadratures = 4
 
 quantum_constants = QuantumConstants(

@@ -1,3 +1,3 @@
 from .quantum_constants import QuantumConstants
-from .quantum_parameters import QuantumParameters
+from .quantum_parameters import QuantumParameters, QuantumParametersConfig
 from .simulation_constants import SimulationConstants

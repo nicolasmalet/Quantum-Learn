@@ -4,18 +4,18 @@ import numpy as np
 from zeroth.zeroth_order.gradient_estimators import GradientEstimator
 from zeroth.zeroth_order.zeroth_order_blackbox import ZerothOrderBlackBox
 
+from quantum_learn.types import BuildF
 from quantum_simulation.jpc_chip import JpcChip
 from quantum_simulation.parameters_and_constants.quantum_constants import QuantumConstants
-from quantum_simulation.parameters_and_constants.quantum_parameters import QuantumParameters
+from quantum_simulation.parameters_and_constants.quantum_parameters import QuantumParameters, QuantumParametersConfig
 from quantum_simulation.parameters_and_constants.simulation_constants import SimulationConstants
-from quantum_learn.types import BuildF
 
 
 @dataclass
 class QuantumBlackBoxConfig:
     name: str
     quantum_constants: QuantumConstants
-    quantum_parameters: QuantumParameters
+    quantum_parameters: QuantumParametersConfig
     simulation_constants: SimulationConstants
     build_F: BuildF
 
@@ -26,7 +26,7 @@ class QuantumBlackBoxConfig:
 class QuantumBlackBox(ZerothOrderBlackBox):
     def __init__(self, config: QuantumBlackBoxConfig) -> None:
         self.name: str = config.name
-        self.params: QuantumParameters = config.quantum_parameters
+        self.params: QuantumParameters = config.quantum_parameters.instantiate()
         self.nb_params: int = len(fields(self.params))
 
         self.quantum_constants = config.quantum_constants
@@ -69,7 +69,8 @@ class QuantumBlackBox(ZerothOrderBlackBox):
         """
         perturbed_params = [QuantumParameters(*params) for params in gradient_estimator.perturb(self.params.as_array())]
         state_history_list = self.simulator.run_simulation(X, perturbed_params)
-        return np.stack([self.build_F(state_history, self.simulation_constants) for state_history in state_history_list], axis=0)
+        return np.stack(
+            [self.build_F(state_history, self.simulation_constants) for state_history in state_history_list], axis=0)
 
     def update_params(self, grad: np.ndarray, learning_rate: float) -> None:
         """

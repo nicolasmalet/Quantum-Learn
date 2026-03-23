@@ -21,3 +21,13 @@ class QuantumParameters:
         for field, value in zip(fields(self), array):
             setattr(self, field.name, getattr(self, field.name) - value)
         return self
+
+
+@dataclass(frozen=True)
+class QuantumParametersConfig:
+    g_conv: float
+    g_sq: float
+
+    def instantiate(self) -> QuantumParameters:
+        return QuantumParameters(g_conv=self.g_conv,
+                                 g_sq=self.g_sq)

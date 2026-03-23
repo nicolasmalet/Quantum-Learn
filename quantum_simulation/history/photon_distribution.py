@@ -25,9 +25,9 @@ class PhotonDistribution:
         self.time_interval = time_interval
 
         diag = jnp.diagonal(self.states.to_jax(), axis1=-2, axis2=-1)
-        self.joint_Proba = diag.reshape(states.shape[0], self.DIM_A, self.DIM_B).real
-        self.P_a = self.joint_Proba.sum(axis=2)
-        self.P_b = self.joint_Proba.sum(axis=1)
+        self.joint_proba = diag.reshape(states.shape[0], self.DIM_A, self.DIM_B).real
+        self.P_a = self.joint_proba.sum(axis=2)
+        self.P_b = self.joint_proba.sum(axis=1)
 
     def Plot_Mean_Photon_Number(self):
         """
@@ -62,12 +62,12 @@ class PhotonDistribution:
         plt.subplots_adjust(bottom=0.2)
 
         # --- Normalisation log ---
-        vmax = self.joint_Proba.max()
-        vmin = max(self.joint_Proba[self.joint_Proba > 0].min(), vmax * 1e-6)  # évite log(0)
+        vmax = self.joint_proba.max()
+        vmin = max(self.joint_proba[self.joint_proba > 0].min(), vmax * 1e-6)  # évite log(0)
         norm = mcolors.LogNorm(vmin=vmin, vmax=vmax)
 
         # --- Plot initial (k=0) ---
-        data = np.array(self.joint_Proba[0].T)
+        data = np.array(self.joint_proba[0].T)
         data = np.clip(data, vmin, None)  # remplace les 0 par vmin
 
         im = ax.imshow(
@@ -96,7 +96,7 @@ class PhotonDistribution:
         # --- Callback ---
         def update(val):
             k = int(slider.val)
-            data = np.clip(np.array(self.joint_Proba[k].T), vmin, None)
+            data = np.clip(np.array(self.joint_proba[k].T), vmin, None)
             im.set_data(data)
             title.set_text(f"$P(|i\\rangle|j\\rangle)$ — $t = {self.time_interval[k]:.4f}$")
             fig.canvas.draw_idle()
@@ -133,7 +133,7 @@ class PhotonDistribution:
         title = ax.set_title(rf"{label_P} — $t = {self.time_interval[0]:.4f}$")
 
         # --- Slider ---
-        ax_slider = plt.axes([0.15, 0.08, 0.7, 0.04])
+        ax_slider = plt.axes((0.15, 0.08, 0.7, 0.04))
         slider = Slider(
             ax=ax_slider,
             label="Temps $k$",
