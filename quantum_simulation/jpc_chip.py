@@ -38,8 +38,8 @@ class JpcChip:
     """  # résolution des simulations Dynamiqs
 
     def __init__(self, quantum_constants: QuantumConstants, simulation_params: SimulationConstants):
-        self.quantum_constants = quantum_constants
-        self.simulation_params = simulation_params
+        self.quantum_constants: QuantumConstants = quantum_constants
+        self.simulation_params: SimulationConstants = simulation_params
 
     def run_simulation(self, X: np.ndarray, quantum_parameters_list: list[QuantumParameters]) -> list[StateHistory]:
         """
