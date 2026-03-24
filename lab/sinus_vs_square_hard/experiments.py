@@ -108,5 +108,13 @@ class ExperimentCatalog:
                                                 plot_dimension=0,
                                                 smooth_fraction=SMOOTH_FRACTION)
 
+    dudas: ExperimentConfig = ExperimentConfig(name="dudas",
+                                                title="Training Loss Dudas",
+                                                base_model=models.quantum_model_config_dudas,
+                                                variations=[],
+                                                create_data=create_data,
+                                                plot_dimension=0,
+                                                smooth_fraction=SMOOTH_FRACTION)
+
 
 EXPERIMENTS = ExperimentCatalog()
