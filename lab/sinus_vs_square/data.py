@@ -7,13 +7,13 @@ def create_data(nb_periods_train: int = 100, nb_periods_test: int = 10) -> Data:
     sinus = np.array([-0.7, 0, 0.7, 1, 0.7, 0, -0.7, -1])
     square = np.array([1, 1, 1, 1, -1, -1, -1, -1])
 
-    X_train = np.zeros((nb_periods_train, NB_POINTS_PER_PERIOD))
+    X_train = np.empty((nb_periods_train, NB_POINTS_PER_PERIOD))
     Y_train = np.random.binomial(1, 0.5, (nb_periods_train, 1))
 
     for i in range(nb_periods_train):
         X_train[i, :] = sinus if Y_train[i, 0] == 1 else square
 
-    X_test = np.zeros((nb_periods_test, NB_POINTS_PER_PERIOD))
+    X_test = np.empty((nb_periods_test, NB_POINTS_PER_PERIOD))
     Y_test = np.random.binomial(1, 0.5, (nb_periods_test, 1))
 
     for i in range(nb_periods_test):

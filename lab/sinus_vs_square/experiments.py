@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from zeroth.experiment import ExperimentConfig, VariationConfig
 
 from lab.sinus_vs_square.config.quantum_network_config import null_gradient_estimator
-from lab.sinus_vs_square.create_data import create_data
+from lab.sinus_vs_square.data import create_data
 from lab.sinus_vs_square.models import quantum_model_config, no_quantum_learning_model
 from lab.sinus_vs_square.task_constants import NB_POINTS_PER_PERIOD
 from quantum_learn import paths

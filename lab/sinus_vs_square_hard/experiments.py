@@ -47,6 +47,8 @@ class VariationCatalog:
 
 VARIATIONS = VariationCatalog()
 
+SMOOTH_FRACTION = 0.05
+
 
 #  WARNING: some VariationConfig might overwrite others depending on the order of variations
 @dataclass(frozen=True)
@@ -57,7 +59,7 @@ class ExperimentCatalog:
                                                          variations=[],
                                                          create_data=create_data,
                                                          plot_dimension=0,
-                                                         smooth_fraction=0)
+                                                         smooth_fraction=SMOOTH_FRACTION)
 
     measure_resolution: ExperimentConfig = ExperimentConfig(name="measure_resolution",
                                                             title="Measure Resolution",
@@ -65,7 +67,7 @@ class ExperimentCatalog:
                                                             variations=[VARIATIONS.measure_resolution],
                                                             create_data=create_data,
                                                             plot_dimension=0,
-                                                            smooth_fraction=0)
+                                                            smooth_fraction=SMOOTH_FRACTION)
 
     quantum_lr: ExperimentConfig = ExperimentConfig(name="quantum_lr",
                                                     title="Training Loss vs Chip Parameters LR",
@@ -73,7 +75,7 @@ class ExperimentCatalog:
                                                     variations=[VARIATIONS.quantum_lr],
                                                     create_data=create_data,
                                                     plot_dimension=1,
-                                                    smooth_fraction=0)
+                                                    smooth_fraction=SMOOTH_FRACTION)
 
     no_quantum_learning: ExperimentConfig = ExperimentConfig(name="no_quantum_learning",
                                                              title="Training loss vs no quantum learning",
@@ -81,7 +83,7 @@ class ExperimentCatalog:
                                                              variations=[],
                                                              create_data=create_data,
                                                              plot_dimension=0,
-                                                             smooth_fraction=0)
+                                                             smooth_fraction=SMOOTH_FRACTION)
 
     photon: ExperimentConfig = ExperimentConfig(name="photon",
                                                 title="photon model",
@@ -89,7 +91,7 @@ class ExperimentCatalog:
                                                 variations=[],
                                                 create_data=create_data,
                                                 plot_dimension=0,
-                                                smooth_fraction=0)
+                                                smooth_fraction=SMOOTH_FRACTION)
 
 
 EXPERIMENTS = ExperimentCatalog()
