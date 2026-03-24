@@ -13,7 +13,6 @@ quantum_model_config = QuantumModelConfig(
     loss=CrossEntropy(),
     metric=accuracy,
     batch_size=batch_size,
-    nb_epochs=nb_epochs,
 
     neural_network_config=nn.XS,
     neural_network_optimizer_config=nn.first_order_adam,
@@ -28,7 +27,6 @@ no_quantum_learning_model = QuantumModelConfig(
     loss=CrossEntropy(),
     metric=accuracy,
     batch_size=batch_size,
-    nb_epochs=nb_epochs,
 
     neural_network_config=nn.XS,
     neural_network_optimizer_config=nn.first_order_adam,
@@ -43,7 +41,6 @@ photon_model_config = QuantumModelConfig(
     loss=CrossEntropy(),
     metric=accuracy,
     batch_size=batch_size,
-    nb_epochs=nb_epochs,
 
     neural_network_config=nn.linear_photons,
     neural_network_optimizer_config=nn.first_order_adam,

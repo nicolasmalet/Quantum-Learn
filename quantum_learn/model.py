@@ -5,8 +5,7 @@ from zeroth.abstract import NeuralNetworkConfig, Model, ModelConfig
 from zeroth.first_order import FirstOrderOptimizer, FirstOrderNeuralNetwork, FirstOrderOptimizerConfig
 from zeroth.zeroth_order import ZerothOrderOptimizer, GradientEstimator, GradientEstimatorConfig, \
     ZerothOrderOptimizerConfig
-
-from lab.sinus_vs_square_hard.data import DataSignal
+from zeroth.data import Data
 from quantum_learn.quantum_black_box import QuantumBlackBox, QuantumBlackBoxConfig
 
 
@@ -45,7 +44,7 @@ class QuantumModel(Model):
         self.neural_network: FirstOrderNeuralNetwork = FirstOrderNeuralNetwork(config.neural_network_config)
         self.neural_network_optimizer: FirstOrderOptimizer = config.neural_network_optimizer_config.instantiate()
 
-    def train(self, data: DataSignal, nb_print: int = 0) -> None:
+    def train(self, data: Data, nb_print: int = 0) -> None:
         """Runs the training loop over the dataset.
 
         Args:
@@ -55,37 +54,37 @@ class QuantumModel(Model):
         Returns:
             Array: Array of loss values recorded at each step (for plotting).
         """
-        nb_batches = data.nb_periods // self.batch_size
+        data.batch_size = self.batch_size
+        nb_batches = data.nb_batches
 
-        self.training_loss = np.zeros(self.nb_epochs * nb_batches, dtype=np.float64)
+        self.training_loss = np.empty(nb_batches, dtype=np.float64)
 
         print_indexes = np.linspace(0, nb_batches - 1, nb_print).astype(int)
         print(f"    Training {self.id} Model")
-        for epoch_idx in range(self.nb_epochs):
-            print(f"        epoch n°{epoch_idx + 1} out of {self.nb_epochs}")
-            data.prepare_data(self.batch_size)
-            for batch_idx in range(nb_batches):
-                X_train, Y_train = data.X_train[batch_idx], data.Y_train[batch_idx]
+        for batch_idx, (X_train, Y_train) in enumerate(data):
+            X_train, Y_train = X_train.ravel(), Y_train.ravel()
+            pF_pred = self.quantum_network.forward_perturbed(X_train.ravel(), self.quantum_gradient_estimator)
+            pY_pred = self.neural_network.forward(pF_pred)
 
-                pF_pred = self.quantum_network.forward_perturbed(X_train, self.quantum_gradient_estimator)
-                pY_pred = self.neural_network.forward(pF_pred)
+            print(pY_pred.shape, Y_train.shape)
 
-                avg_loss, pLoss = self.loss.compute_losses_for_zeroth_order(pY_pred, Y_train)
+            avg_loss, pLoss = self.loss.compute_losses_for_zeroth_order(pY_pred, Y_train)
 
-                gradient = self.quantum_gradient_estimator.get_gradient(pLoss)
+            gradient = self.quantum_gradient_estimator.get_gradient(pLoss)
 
-                F = pF_pred[0]
-                self.neural_network_optimizer.do_descent(self.neural_network, self.loss, F, Y_train)
-                self.quantum_optimizer.update_params(self.quantum_network, gradient)
+            F = pF_pred[0]
+            print(F.shape, Y_train.shape, self.neural_network.input_dim)
+            self.neural_network_optimizer.do_descent(self.neural_network, self.loss, F, Y_train)
+            self.quantum_optimizer.update_params(self.quantum_network, gradient)
 
-                self.training_loss[epoch_idx * nb_batches + batch_idx] = avg_loss
+            self.training_loss[batch_idx] = avg_loss
 
-                if batch_idx in print_indexes:
-                    print(f"            batch n°{batch_idx + 1} out of {nb_batches}, "
-                          f"loss : {self.training_loss[epoch_idx * nb_batches + batch_idx]}",
-                          f"q_params : {self.quantum_network.params}")
+            if batch_idx in print_indexes:
+                print(f"            batch n°{batch_idx + 1} out of {nb_batches}, "
+                      f"loss : {self.training_loss[batch_idx]}",
+                      f"q_params : {self.quantum_network.params}")
 
-    def test(self, data: DataSignal) -> None:
+    def test(self, data: Data) -> None:
         X_test, Y_true = data.X_test, data.Y_test
         F_pred = self.quantum_network.forward(X_test)
         Y_pred = self.neural_network.forward(F_pred)

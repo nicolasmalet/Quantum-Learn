@@ -63,8 +63,8 @@ class JpcChip:
         """
 
         nb_simulations = len(quantum_parameters_list)
-        time_interval = jnp.linspace(0, self.quantum_constants.DRIVE_DURATION * len(X),
-                                     self.simulation_params.SIMULATION_RESOLUTION * len(X))
+        time_interval = jnp.linspace(0, self.quantum_constants.DRIVE_DURATION * X.size,
+                                     self.simulation_params.SIMULATION_RESOLUTION * X.size)
         psi = self.quantum_constants.vacuum_state
         tab_data = np.repeat(X, self.simulation_params.SIMULATION_RESOLUTION)[:-1]
 
