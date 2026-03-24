@@ -21,7 +21,7 @@ quantum_model_config = QuantumModelConfig(
     quantum_optimizer_config=qn.zeroth_order_adam,
     quantum_network_config=qn.quantum_network_config)
 
-no_quantum_learning_model = QuantumModelConfig(
+no_quantum_learning_model_xs = QuantumModelConfig(
     name="Quantum Model",
     id={},
     loss=CrossEntropy(),
