@@ -7,6 +7,7 @@ from lab.sinus_vs_square.config.quantum_network_config import finite_difference,
     quantum_network_config, \
     null_gradient_estimator
 from quantum_learn.model import QuantumModelConfig
+from quantum_learn.build_f import build_f_quadratures
 
 quantum_model_config = QuantumModelConfig(
     name="Quantum Model",
@@ -21,7 +22,8 @@ quantum_model_config = QuantumModelConfig(
 
     quantum_gradient_estimator=finite_difference,
     quantum_optimizer_config=zeroth_order_adam,
-    quantum_network_config=quantum_network_config)
+    quantum_network_config=quantum_network_config,
+    build_f=build_f_quadratures)
 
 no_quantum_learning_model = QuantumModelConfig(
     name="Quantum Model",
@@ -36,4 +38,5 @@ no_quantum_learning_model = QuantumModelConfig(
 
     quantum_gradient_estimator=null_gradient_estimator,
     quantum_optimizer_config=zeroth_order_adam,
-    quantum_network_config=quantum_network_config)
+    quantum_network_config=quantum_network_config,
+    build_f=build_f_quadratures)

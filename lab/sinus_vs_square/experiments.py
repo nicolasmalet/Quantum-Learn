@@ -3,13 +3,13 @@ from dataclasses import dataclass
 from zeroth.experiment import ExperimentConfig, VariationConfig
 
 from lab.sinus_vs_square.config.quantum_network_config import null_gradient_estimator
-from lab.sinus_vs_square.data import create_data
+from lab.sinus_vs_square.data import create_data_default
 from lab.sinus_vs_square.models import quantum_model_config, no_quantum_learning_model
 from lab.sinus_vs_square.task_constants import NB_POINTS_PER_PERIOD
 from quantum_learn import paths
 
-
 nb_quadratures = 4
+
 
 class VariationCatalog:
     classical_lr = VariationConfig(
@@ -55,7 +55,7 @@ class ExperimentCatalog:
                                                          title="Measure Resolution",
                                                          base_model=quantum_model_config,
                                                          variations=[],
-                                                         create_data=create_data,
+                                                         create_data=create_data_default,
                                                          plot_dimension=0,
                                                          smooth_fraction=0)
 
@@ -63,7 +63,7 @@ class ExperimentCatalog:
                                                             title="Measure Resolution",
                                                             base_model=quantum_model_config,
                                                             variations=[VARIATIONS.measure_resolution],
-                                                            create_data=create_data,
+                                                            create_data=create_data_default,
                                                             plot_dimension=0,
                                                             smooth_fraction=0)
 
@@ -71,7 +71,7 @@ class ExperimentCatalog:
                                                     title="Training Loss vs Chip Parameters LR",
                                                     base_model=quantum_model_config,
                                                     variations=[VARIATIONS.quantum_lr],
-                                                    create_data=create_data,
+                                                    create_data=create_data_default,
                                                     plot_dimension=1,
                                                     smooth_fraction=0)
 
@@ -79,7 +79,7 @@ class ExperimentCatalog:
                                                              title="Training loss vs no quantum learning",
                                                              base_model=no_quantum_learning_model,
                                                              variations=[],
-                                                             create_data=create_data,
+                                                             create_data=create_data_default,
                                                              plot_dimension=0,
                                                              smooth_fraction=0)
 

@@ -7,6 +7,7 @@ from zeroth.zeroth_order import ZerothOrderOptimizer, GradientEstimator, Gradien
     ZerothOrderOptimizerConfig
 from zeroth.data import Data
 from quantum_learn.quantum_black_box import QuantumBlackBox, QuantumBlackBoxConfig
+from .types import BuildF
 
 
 @dataclass(frozen=True)
@@ -17,6 +18,8 @@ class QuantumModelConfig(ModelConfig):
     quantum_network_config: QuantumBlackBoxConfig
     quantum_gradient_estimator: GradientEstimatorConfig
     quantum_optimizer_config: ZerothOrderOptimizerConfig
+
+    build_f: BuildF
 
     def instantiate(self):
         return QuantumModel(self)
@@ -44,6 +47,8 @@ class QuantumModel(Model):
         self.neural_network: FirstOrderNeuralNetwork = FirstOrderNeuralNetwork(config.neural_network_config)
         self.neural_network_optimizer: FirstOrderOptimizer = config.neural_network_optimizer_config.instantiate()
 
+        self.build_f: BuildF = config.build_f
+
     def train(self, data: Data, nb_print: int = 0) -> None:
         """Runs the training loop over the dataset.
 
@@ -63,7 +68,10 @@ class QuantumModel(Model):
         print(f"    Training {self.id} Model")
         for batch_idx, (X_train, Y_train) in enumerate(data):
             X_train = X_train.ravel()
-            pF_pred = self.quantum_network.forward_perturbed(X_train.ravel(), self.quantum_gradient_estimator)
+            state_history_list = self.quantum_network.forward_perturbed(X_train.ravel(), self.quantum_gradient_estimator)
+            pF_pred = np.stack(
+                [self.build_f(state_history, self.quantum_network.simulation_constants, self.neural_network.input_dim) for state_history in state_history_list],
+                axis=0)
             pY_pred = self.neural_network.forward(pF_pred)
             avg_loss, pLoss = self.loss.compute_losses_for_zeroth_order(pY_pred, Y_train)
 
@@ -82,7 +90,8 @@ class QuantumModel(Model):
 
     def test(self, data: Data) -> None:
         X_test, Y_true = data.X_test, data.Y_test
-        F_pred = self.quantum_network.forward(X_test)
+        state_history = self.quantum_network.forward(X_test)
+        F_pred = self.build_f(state_history, self.quantum_network.simulation_constants, self.neural_network.input_dim)
         Y_pred = self.neural_network.forward(F_pred)
 
         self.test_accuracy = self.metric(Y_pred, Y_true)

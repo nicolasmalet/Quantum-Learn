@@ -14,7 +14,6 @@ quantum_network_config = QuantumBlackBoxConfig(
     quantum_constants=quantum_constants,
     quantum_parameters=quantum_parameters,
     simulation_constants=simulation_constants,
-    build_F=build_f_quadratures
 )
 
 zeroth_order_adam = ZerothOrderAdamConfig(learning_rate=0.02,

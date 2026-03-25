@@ -98,5 +98,5 @@ class QuantumConstants:
         dynamiqs.qarrays.sparsedia_qarray.SparseDIAQArray (Dynamiqs Hamiltonian)
             Free-drive hamiltonian = Kerr effet + JRM contributions (conversion AND two mode squeezing)
         """
-        return self.H_kerr + g_conv * (dq.tensor(self.a, self.b_dag) + dq.tensor(self.a_dag, self.b)) + g_sq * (
-                dq.tensor(self.a, self.b) + dq.tensor(self.a_dag, self.b_dag))
+        return (self.H_kerr + g_conv * (dq.tensor(self.a, self.b_dag) + dq.tensor(self.a_dag, self.b))
+                + g_sq * (dq.tensor(self.a, self.b) + dq.tensor(self.a_dag, self.b_dag))
