@@ -6,7 +6,7 @@ from quantum_learn import paths
 from . import models
 from .config import neural_networks as nn
 from .config.quantum_network_config import null_gradient_estimator
-from .data import create_data
+from .data import create_data_default
 from .task_constants import NB_POINTS_PER_PERIOD
 
 nb_quadratures = 4
@@ -64,7 +64,7 @@ class ExperimentCatalog:
                                                          title="Measure Resolution",
                                                          base_model=models.quantum_model_config,
                                                          variations=[],
-                                                         create_data=create_data,
+                                                         create_data=create_data_default,
                                                          plot_dimension=0,
                                                          smooth_fraction=SMOOTH_FRACTION)
 
@@ -72,7 +72,7 @@ class ExperimentCatalog:
                                                             title="Measure Resolution",
                                                             base_model=models.quantum_model_config,
                                                             variations=[VARIATIONS.measure_resolution],
-                                                            create_data=create_data,
+                                                            create_data=create_data_default,
                                                             plot_dimension=0,
                                                             smooth_fraction=SMOOTH_FRACTION)
 
@@ -80,7 +80,7 @@ class ExperimentCatalog:
                                                     title="Training Loss vs Chip Parameters LR",
                                                     base_model=models.quantum_model_config,
                                                     variations=[VARIATIONS.quantum_lr],
-                                                    create_data=create_data,
+                                                    create_data=create_data_default,
                                                     plot_dimension=1,
                                                     smooth_fraction=SMOOTH_FRACTION)
 
@@ -88,7 +88,7 @@ class ExperimentCatalog:
                                                              title="Training loss vs no quantum learning",
                                                              base_model=models.no_quantum_learning_model_xs,
                                                              variations=[],
-                                                             create_data=create_data,
+                                                             create_data=create_data_default,
                                                              plot_dimension=0,
                                                              smooth_fraction=SMOOTH_FRACTION)
 
@@ -96,7 +96,7 @@ class ExperimentCatalog:
                                                        title="Training loss, no quantum learning",
                                                        base_model=models.no_quantum_learning_model_xs,
                                                        variations=[VARIATIONS.classical_network_size],
-                                                       create_data=create_data,
+                                                       create_data=create_data_default,
                                                        plot_dimension=0,
                                                        smooth_fraction=SMOOTH_FRACTION)
 
@@ -104,7 +104,7 @@ class ExperimentCatalog:
                                                 title="photon model",
                                                 base_model=models.photon_model_config,
                                                 variations=[],
-                                                create_data=create_data,
+                                                create_data=create_data_default,
                                                 plot_dimension=0,
                                                 smooth_fraction=SMOOTH_FRACTION)
 
@@ -112,7 +112,7 @@ class ExperimentCatalog:
                                                 title="Training Loss Dudas",
                                                 base_model=models.quantum_model_config_dudas,
                                                 variations=[],
-                                                create_data=create_data,
+                                                create_data=create_data_default,
                                                 plot_dimension=0,
                                                 smooth_fraction=SMOOTH_FRACTION)
 
