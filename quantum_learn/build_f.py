@@ -8,7 +8,7 @@ from quantum_simulation.parameters_and_constants import SimulationConstants
 def build_f_quadratures(state_history: StateHistory, simulation_constants: SimulationConstants,
                         input_dim: int) -> Array:
     """
-    Construit la feature matrix selon la bonne notation
+    Construit la feature matrix
 
     Returns
     -------

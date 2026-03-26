@@ -68,16 +68,18 @@ class QuantumModel(Model):
         print(f"    Training {self.id} Model")
         for batch_idx, (X_train, Y_train) in enumerate(data):
             X_train = X_train.ravel()
-            state_history_list = self.quantum_network.forward_perturbed(X_train.ravel(), self.quantum_gradient_estimator)
-            pF_pred = np.stack(
+
+            state_history_list = self.quantum_network.forward_perturbed(X_train, self.quantum_gradient_estimator)
+            perturbed_F_pred = np.stack(
                 [self.build_f(state_history, self.quantum_network.simulation_constants, self.neural_network.input_dim) for state_history in state_history_list],
                 axis=0)
-            pY_pred = self.neural_network.forward(pF_pred)
-            avg_loss, pLoss = self.loss.compute_losses_for_zeroth_order(pY_pred, Y_train)
+            perturbed_Y_pred = self.neural_network.forward(perturbed_F_pred)
 
-            gradient = self.quantum_gradient_estimator.get_gradient(pLoss)
+            avg_loss, perturbed_Loss = self.loss.compute_losses_for_zeroth_order(perturbed_Y_pred, Y_train)
 
-            F = pF_pred[0]
+            gradient = self.quantum_gradient_estimator.get_gradient(perturbed_Loss)
+
+            F = perturbed_F_pred[0]
             self.neural_network_optimizer.do_descent(self.neural_network, self.loss, F, Y_train)
             self.quantum_optimizer.update_params(self.quantum_network, gradient)
 

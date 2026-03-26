@@ -2,9 +2,9 @@ from zeroth import first_order
 from zeroth.abstract import NeuralNetworkConfig, LayerConfig
 from zeroth.utils.activation_functions import softmax, relu
 
-from .data_config import *
-from ..task_constants import NB_CLASS
 from quantum_simulation.jpc_config import quantum_constants
+from .data_config import measure_resolution
+from ..task_constants import NB_CLASS
 
 nb_quadratures = 4
 input_dim_quadratures = 4 * measure_resolution

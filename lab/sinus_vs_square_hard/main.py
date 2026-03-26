@@ -1,6 +1,6 @@
-from .experiments import EXPERIMENTS
+from . import experiments
 
 
 def main(do_train, do_test, nb_print_train, do_plot_train, do_save):
-    experiment = EXPERIMENTS.no_quantum_learning_vs_quantum_learning_dudas.instantiate()
+    experiment = experiments.dudas.instantiate()
     experiment.launch(do_train, do_test, nb_print_train, do_plot_train, do_save)

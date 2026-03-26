@@ -21,8 +21,7 @@ quantum_model_config_dudas = QuantumModelConfig(
     quantum_optimizer_config=qn.zeroth_order_adam,
     quantum_gradient_estimator=qn.finite_difference,
 
-    build_f=build_f_quadratures
-)
+    build_f=build_f_quadratures)
 
 quantum_model_config = QuantumModelConfig(
     name="Quantum Model",
