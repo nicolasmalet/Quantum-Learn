@@ -70,7 +70,7 @@ class JpcChip:
 
         H_drive = dq.pwc(time_interval, tab_data, self.quantum_constants.Hd)
         H0s = dq.stack([
-            self.quantum_constants.H0(quantum_parameters.g_conv, quantum_parameters.g_sq)
+            self.quantum_constants.H0(quantum_parameters)
             for quantum_parameters in quantum_parameters_list
         ])
         H = H0s + H_drive

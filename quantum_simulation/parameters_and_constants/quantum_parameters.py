@@ -7,8 +7,12 @@ import numpy as np
 
 @dataclass(frozen=False)
 class QuantumParameters:
-    g_conv: float
-    g_sq: float
+    g_conv_real: float
+    g_conv_imag: float
+    g_sq_real: float
+    g_sq_imag: float
+    delta_a: float
+    delta_b: float
 
     def as_array(self):
         return np.array([getattr(self, f.name) for f in fields(self)])
@@ -25,9 +29,17 @@ class QuantumParameters:
 
 @dataclass(frozen=True)
 class QuantumParametersConfig:
-    g_conv: float
-    g_sq: float
+    g_conv_real: float
+    g_conv_imag: float
+    g_sq_real: float
+    g_sq_imag: float
+    delta_a: float
+    delta_b: float
 
     def instantiate(self) -> QuantumParameters:
-        return QuantumParameters(g_conv=self.g_conv,
-                                 g_sq=self.g_sq)
+        return QuantumParameters(g_conv_real=self.g_conv_real,
+                                 g_conv_imag=self.g_conv_imag,
+                                 g_sq_real=self.g_sq_real,
+                                 g_sq_imag=self.g_sq_imag,
+                                 delta_a = self.delta_a,
+                                 delta_b = self.delta_b)

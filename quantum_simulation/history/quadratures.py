@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+from ..parameters_and_constants.simulation_constants import SimulationConstants
+
 
 class Quadratures:
     """
@@ -12,6 +14,7 @@ class Quadratures:
 
     Parameters
     ----------
+    params: SimulationConstants
     expects
 
     Attributes
@@ -29,11 +32,11 @@ class Quadratures:
     Je l'ai vu dans un rêve...
     """
 
-    def __init__(self, expects) -> None:
-        self.L_Ia: np.ndarray = expects[0].real
-        self.L_Qa: np.ndarray = expects[0].imag
-        self.L_Ib: np.ndarray = expects[1].real
-        self.L_Qb: np.ndarray = expects[1].imag
+    def __init__(self, expects):
+        self.L_Ia = expects[0].real
+        self.L_Qa = expects[0].imag
+        self.L_Ib = expects[1].real
+        self.L_Qb = expects[1].imag
 
     def plot(self) -> None:
         # Plot les quadratures en fonction du temps

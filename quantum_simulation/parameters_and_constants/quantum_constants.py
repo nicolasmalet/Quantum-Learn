@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from .quantum_parameters import QuantumParameters
 
 import dynamiqs as dq
 import jax.numpy as jnp
@@ -13,6 +14,8 @@ class QuantumConstants:
         Resonance frequency of mode a (GHz).
     OMEGA_B : float
         Resonance frequency of mode b (GHz).
+    g : float
+        Nonlinear coupling strength.
     DIM_A : int
         Hilbert space truncation dimension for mode a.
     DIM_B : int
@@ -34,7 +37,7 @@ class QuantumConstants:
 
     Attributes
     ----------
-    self.H0 :
+    H0 :
         Builds the free-drive hamiltonian.
 
     """
@@ -59,6 +62,8 @@ class QuantumConstants:
         self.b = dq.destroy(self.DIM_B)
         self.b_dag = self.b.dag()
         self.N_b = self.b_dag @ self.b
+        self.Ha = dq.tensor(self.N_a, dq.eye(self.DIM_B))
+        self.Hb = dq.tensor(dq.eye(self.DIM_A), self.N_b)
 
         self.H_kerr_a = self.K_AA * self.N_a @ self.N_a
         self.H_kerr_b = self.K_BB * self.N_b @ self.N_b
@@ -80,7 +85,7 @@ class QuantumConstants:
         self.exp_ops = [dq.tensor(self.a, dq.eye(self.DIM_B)),
                         dq.tensor(dq.eye(self.DIM_A), self.b)]  # Valeurs moyennes à calculer
 
-    def H0(self, g_conv: float, g_sq: float):
+    def H0(self, quantum_parameters: QuantumParameters):
         """
         Build the free-drive Hamiltonian.
 
@@ -96,5 +101,17 @@ class QuantumConstants:
         dynamiqs.qarrays.sparsedia_qarray.SparseDIAQArray (Dynamiqs Hamiltonian)
             Free-drive hamiltonian = Kerr effet + JRM contributions (conversion AND two mode squeezing)
         """
-        return (self.H_kerr + g_conv * (dq.tensor(self.a, self.b_dag) + dq.tensor(self.a_dag, self.b))
-                + g_sq * (dq.tensor(self.a, self.b) + dq.tensor(self.a_dag, self.b_dag)))
+        g_conv_real = quantum_parameters.g_conv_real
+        g_conv_imag = quantum_parameters.g_conv_imag
+        g_sq_real = quantum_parameters.g_sq_real
+        g_sq_imag = quantum_parameters.g_sq_imag
+        g_conv = g_conv_real + 1j * g_conv_imag
+        g_conv_conj = g_conv_real - 1j * g_conv_imag
+        g_sq = g_sq_real + 1j * g_sq_imag
+        g_sq_conj = g_sq_real - 1j * g_sq_imag
+        delta_a = quantum_parameters.delta_a
+        delta_b = quantum_parameters.delta_b
+
+        return self.H_kerr + delta_a * self.Ha + delta_b * self.Hb + ( g_conv_conj *
+            dq.tensor(self.a, self.b_dag) + g_conv * dq.tensor(self.a_dag, self.b)) + (
+               g_sq_conj * dq.tensor(self.a, self.b) + g_sq * dq.tensor(self.a_dag, self.b_dag))

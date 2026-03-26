@@ -34,6 +34,5 @@ quantum_constants_dudas = QuantumConstants(
 )
 
 
-
 simulation_constants = SimulationConstants(MEASURE_RESOLUTION=10,
                                            SIMULATION_RESOLUTION=10)
