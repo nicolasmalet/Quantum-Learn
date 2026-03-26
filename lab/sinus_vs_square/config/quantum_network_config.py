@@ -4,7 +4,6 @@ from zeroth.zeroth_order.gradient_estimators import FiniteDifferenceConfig, Null
 from quantum_learn.quantum_black_box import QuantumBlackBoxConfig
 from quantum_simulation.jpc_config import quantum_constants, simulation_constants
 from quantum_simulation.parameters_and_constants import QuantumParametersConfig
-from .build_f import build_f_quadratures
 
 quantum_parameters = QuantumParametersConfig(g_conv=50, g_sq=50)
 nb_chip_variables = 2

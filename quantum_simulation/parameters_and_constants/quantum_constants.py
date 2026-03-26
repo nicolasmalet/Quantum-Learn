@@ -13,8 +13,6 @@ class QuantumConstants:
         Resonance frequency of mode a (GHz).
     OMEGA_B : float
         Resonance frequency of mode b (GHz).
-    g : float
-        Nonlinear coupling strength.
     DIM_A : int
         Hilbert space truncation dimension for mode a.
     DIM_B : int
@@ -36,7 +34,7 @@ class QuantumConstants:
 
     Attributes
     ----------
-    H0 :
+    self.H0 :
         Builds the free-drive hamiltonian.
 
     """
@@ -99,4 +97,4 @@ class QuantumConstants:
             Free-drive hamiltonian = Kerr effet + JRM contributions (conversion AND two mode squeezing)
         """
         return (self.H_kerr + g_conv * (dq.tensor(self.a, self.b_dag) + dq.tensor(self.a_dag, self.b))
-                + g_sq * (dq.tensor(self.a, self.b) + dq.tensor(self.a_dag, self.b_dag))
+                + g_sq * (dq.tensor(self.a, self.b) + dq.tensor(self.a_dag, self.b_dag)))

@@ -5,7 +5,7 @@ from zeroth.experiment import ExperimentConfig, VariationConfig
 from quantum_learn import paths
 from . import models
 from .config import neural_networks as nn
-from .config.quantum_network_config import null_gradient_estimator
+from .config.quantum_network_config import null_gradient_estimator, finite_difference
 from .data import create_data_default
 from .task_constants import NB_POINTS_PER_PERIOD
 
@@ -49,6 +49,12 @@ class VariationCatalog:
         name="Classical Network Size",
         param=[paths.NN_CONFIG],
         values=[[nn.linear], [nn.XS]]
+    )
+
+    gradient_vs_null_gradient = VariationConfig(
+        name="No Quantum Learning",
+        param=[paths.GRADIENT_ESTIMATOR],
+        values=[[finite_difference], [null_gradient_estimator]]
     )
 
 
@@ -115,6 +121,14 @@ class ExperimentCatalog:
                                                 create_data=create_data_default,
                                                 plot_dimension=0,
                                                 smooth_fraction=SMOOTH_FRACTION)
+
+    no_quantum_learning_vs_quantum_learning_dudas = ExperimentConfig(name="dudas",
+                                                                     title="quantum learning vs not",
+                                                                     base_model=models.quantum_model_config_dudas,
+                                                                     variations=[VARIATIONS.gradient_vs_null_gradient],
+                                                                     create_data=create_data_default,
+                                                                     plot_dimension=0,
+                                                                     smooth_fraction=SMOOTH_FRACTION)
 
 
 EXPERIMENTS = ExperimentCatalog()

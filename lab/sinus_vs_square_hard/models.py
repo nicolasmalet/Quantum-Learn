@@ -14,7 +14,7 @@ quantum_model_config_dudas = QuantumModelConfig(
     metric=accuracy,
     batch_size=batch_size,
 
-    neural_network_config=nn.XS,
+    neural_network_config=nn.linear,
     neural_network_optimizer_config=nn.first_order_adam,
 
     quantum_network_config=qn.quantum_network_config_dudas,
@@ -34,9 +34,9 @@ quantum_model_config = QuantumModelConfig(
     neural_network_config=nn.linear,
     neural_network_optimizer_config=nn.first_order_adam,
 
-    quantum_gradient_estimator=qn.finite_difference,
     quantum_optimizer_config=qn.zeroth_order_adam,
     quantum_network_config=qn.quantum_network_config,
+    quantum_gradient_estimator=qn.finite_difference,
 
     build_f=build_f_quadratures)
 
@@ -50,9 +50,9 @@ no_quantum_learning_model_xs = QuantumModelConfig(
     neural_network_config=nn.XS,
     neural_network_optimizer_config=nn.first_order_adam,
 
-    quantum_gradient_estimator=qn.null_gradient_estimator,
     quantum_optimizer_config=qn.zeroth_order_adam,
     quantum_network_config=qn.quantum_network_config,
+    quantum_gradient_estimator=qn.null_gradient_estimator,
 
     build_f=build_f_quadratures)
 
@@ -66,8 +66,8 @@ photon_model_config = QuantumModelConfig(
     neural_network_config=nn.linear_photons,
     neural_network_optimizer_config=nn.first_order_adam,
 
-    quantum_gradient_estimator=qn.finite_difference,
     quantum_optimizer_config=qn.zeroth_order_adam,
     quantum_network_config=qn.quantum_photon_config,
+    quantum_gradient_estimator=qn.finite_difference,
 
     build_f=build_f_quadratures)

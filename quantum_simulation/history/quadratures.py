@@ -14,7 +14,6 @@ class Quadratures:
 
     Parameters
     ----------
-    params: SimulationConstants
     expects
 
     Attributes
