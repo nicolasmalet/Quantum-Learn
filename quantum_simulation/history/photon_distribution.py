@@ -5,21 +5,26 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.widgets import Slider
 
+from ..parameters_and_constants import QuantumConstants
+
 
 class PhotonDistribution:
     """
     Docstring to do.
     """
 
-    def __init__(self, simulation_params, quantum_params, states, time_interval):
-        self.quantum_params = quantum_params
-        self.DIM_A = quantum_params.DIM_A
-        self.DIM_B = quantum_params.DIM_B
-        self.Na = dq.expect(dq.tensor(quantum_params.N_a, dq.eye(self.DIM_B)), states)
-        self.Nb = dq.expect(dq.tensor(dq.eye(self.DIM_A), quantum_params.N_b), states)
-        self.Delta_Na = dq.expect(dq.tensor(quantum_params.N_a @ quantum_params.N_a, dq.eye(self.DIM_B)),
+    def __init__(self,
+                 quantum_constants: QuantumConstants, 
+                 states, 
+                 time_interval: jnp.ndarray) -> None:
+        self.quantum_constants = quantum_constants
+        self.DIM_A: int = quantum_constants.DIM_A
+        self.DIM_B: int = quantum_constants.DIM_B
+        self.Na = dq.expect(dq.tensor(quantum_constants.N_a, dq.eye(self.DIM_B)), states)
+        self.Nb = dq.expect(dq.tensor(dq.eye(self.DIM_A), quantum_constants.N_b), states)
+        self.Delta_Na = dq.expect(dq.tensor(quantum_constants.N_a @ quantum_constants.N_a, dq.eye(self.DIM_B)),
                                   states) - self.Na ** 2
-        self.Delta_Nb = dq.expect(dq.tensor(dq.eye(self.DIM_A), quantum_params.N_b @ quantum_params.N_b),
+        self.Delta_Nb = dq.expect(dq.tensor(dq.eye(self.DIM_A), quantum_constants.N_b @ quantum_constants.N_b),
                                   states) - self.Nb ** 2
         self.states = states
         self.time_interval = time_interval
