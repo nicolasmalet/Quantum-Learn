@@ -2,7 +2,7 @@ from zeroth.experiment import VariationConfig
 
 from quantum_learn import paths
 from .config import neural_networks as nn
-from .config.quantum_network_config import null_gradient_estimator, finite_difference
+from .config.quantum_network_config import null_gradient_estimator, global_finite_difference
 from .task_constants import NB_POINTS_PER_PERIOD
 
 nb_quadratures = 4
@@ -48,5 +48,5 @@ classical_network_size = VariationConfig(
 gradient_vs_null_gradient = VariationConfig(
     name="No Quantum Learning",
     param=[paths.GRADIENT_ESTIMATOR],
-    values=[[finite_difference], [null_gradient_estimator]]
+    values=[[global_finite_difference], [null_gradient_estimator]]
 )

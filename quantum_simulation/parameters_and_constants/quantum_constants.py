@@ -91,10 +91,7 @@ class QuantumConstants:
 
         Parameters
         ----------
-        g_conv : float
-            conversion JRM mode coupling coefficient
-        g_sq : float
-            two mode squeezing JRM mode coupling coefficient
+        quantum_parameters: QuantumParameters
 
         Returns
         -------

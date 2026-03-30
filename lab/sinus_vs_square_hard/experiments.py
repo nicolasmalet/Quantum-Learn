@@ -30,7 +30,7 @@ quantum_lr: ExperimentConfig = ExperimentConfig(name="quantum_lr",
                                                 plot_dimension=1,
                                                 smooth_fraction=SMOOTH_FRACTION)
 
-no_quantum_learning: ExperimentConfig = ExperimentConfig(name="no_quantum_learning",
+no_quantum_learning_xs: ExperimentConfig = ExperimentConfig(name="no_quantum_learning",
                                                          title="Training loss vs no quantum learning",
                                                          base_model=models.no_quantum_learning_model_xs,
                                                          variations=[],

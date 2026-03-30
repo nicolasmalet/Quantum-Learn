@@ -19,7 +19,7 @@ quantum_model_config_dudas = QuantumModelConfig(
 
     quantum_network_config=qn.quantum_network_config_dudas,
     quantum_optimizer_config=qn.zeroth_order_adam,
-    quantum_gradient_estimator=qn.finite_difference,
+    quantum_gradient_estimator=qn.partial_gs_finite_difference,
 
     build_f=build_f_quadratures)
 
@@ -35,7 +35,7 @@ quantum_model_config = QuantumModelConfig(
 
     quantum_optimizer_config=qn.zeroth_order_adam,
     quantum_network_config=qn.quantum_network_config,
-    quantum_gradient_estimator=qn.finite_difference,
+    quantum_gradient_estimator=qn.partial_gs_finite_difference,
 
     build_f=build_f_quadratures)
 
@@ -67,6 +67,6 @@ photon_model_config = QuantumModelConfig(
 
     quantum_optimizer_config=qn.zeroth_order_adam,
     quantum_network_config=qn.quantum_photon_config,
-    quantum_gradient_estimator=qn.finite_difference,
+    quantum_gradient_estimator=qn.partial_gs_finite_difference,
 
     build_f=build_f_quadratures)

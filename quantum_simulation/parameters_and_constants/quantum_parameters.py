@@ -21,13 +21,18 @@ class QuantumParameters:
         for field, value in zip(fields(self), array):
             setattr(self, field.name, value)
 
+    @classmethod
+    def get_indices(cls, *names: str) -> list[int]:
+        all_fields = {f.name: i for i, f in enumerate(fields(cls))}
+        return [all_fields[name] for name in names]
+
     def __isub__(self, array: np.ndarray) -> QuantumParameters:
         for field, value in zip(fields(self), array):
             setattr(self, field.name, getattr(self, field.name) - value)
         return self
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class QuantumParametersConfig:
     g_conv_real: float
     g_conv_imag: float
@@ -35,6 +40,11 @@ class QuantumParametersConfig:
     g_sq_imag: float
     delta_a: float
     delta_b: float
+
+    @classmethod
+    def get_indices(cls, *names: str) -> list[int]:
+        all_fields = {f.name: i for i, f in enumerate(fields(cls))}
+        return [all_fields[name] for name in names]
 
     def instantiate(self) -> QuantumParameters:
         return QuantumParameters(g_conv_real=self.g_conv_real,
