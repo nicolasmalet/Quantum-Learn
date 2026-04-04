@@ -1,12 +1,14 @@
 from dataclasses import dataclass
-from .quantum_parameters import QuantumParameters
 
 import dynamiqs as dq
 import jax.numpy as jnp
+from zeroth.abstract import Summary
+
+from .quantum_parameters import QuantumParameters
 
 
 @dataclass
-class QuantumConstants:
+class JPCConfig(Summary):
     """
     Parameters
     ----------
@@ -14,8 +16,6 @@ class QuantumConstants:
         Resonance frequency of mode a (GHz).
     OMEGA_B : float
         Resonance frequency of mode b (GHz).
-    g : float
-        Nonlinear coupling strength.
     DIM_A : int
         Hilbert space truncation dimension for mode a.
     DIM_B : int
@@ -34,10 +34,12 @@ class QuantumConstants:
         drive a amplitude
     EPSILON_B : float
         drive b amplitude
+    MEASURE_RESOLUTION: int
+    SIMULATION_RESOLUTION: int
 
     Attributes
     ----------
-    H0 :
+    self.H0 :
         Builds the free-drive hamiltonian.
 
     """
@@ -54,6 +56,9 @@ class QuantumConstants:
     EPSILON_A: float
     EPSILON_B: float
     DRIVE_DURATION: float
+
+    MEASURE_RESOLUTION: int
+    SIMULATION_RESOLUTION: int
 
     def __post_init__(self):
         self.a = dq.destroy(self.DIM_A)
@@ -109,6 +114,8 @@ class QuantumConstants:
         delta_a = quantum_parameters.delta_a
         delta_b = quantum_parameters.delta_b
 
-        return self.H_kerr + delta_a * self.Ha + delta_b * self.Hb + ( g_conv_conj *
-            dq.tensor(self.a, self.b_dag) + g_conv * dq.tensor(self.a_dag, self.b)) + (
-               g_sq_conj * dq.tensor(self.a, self.b) + g_sq * dq.tensor(self.a_dag, self.b_dag))
+        return self.H_kerr + delta_a * self.Ha + delta_b * self.Hb + (g_conv_conj *
+                                                                      dq.tensor(self.a,
+                                                                                self.b_dag) + g_conv * dq.tensor(
+                    self.a_dag, self.b)) + (
+                g_sq_conj * dq.tensor(self.a, self.b) + g_sq * dq.tensor(self.a_dag, self.b_dag))

@@ -3,10 +3,9 @@ import jax.numpy as jnp
 import numpy as np
 
 from .history.state_history import StateHistory
-from .parameters_and_constants.quantum_constants import QuantumConstants
+from .parameters_and_constants.jpc_config import JPCConfig
 from .parameters_and_constants.quantum_parameters import QuantumParameters
-from .parameters_and_constants.simulation_constants import SimulationConstants
-
+from quantum_learn.types import Array
 
 class JpcChip:
     """
@@ -37,11 +36,10 @@ class JpcChip:
     Cohen-Tannoudji, Quantum Mechanics Vol. 2.
     """  # résolution des simulations Dynamiqs
 
-    def __init__(self, quantum_constants: QuantumConstants, simulation_params: SimulationConstants):
-        self.quantum_constants: QuantumConstants = quantum_constants
-        self.simulation_params: SimulationConstants = simulation_params
+    def __init__(self, jpc_config: JPCConfig):
+        self.config: JPCConfig = jpc_config
 
-    def run_simulation(self, X: np.ndarray, quantum_parameters_list: list[QuantumParameters]) -> list[StateHistory]:
+    def run_simulation(self, X: Array, quantum_parameters_list: list[QuantumParameters]) -> list[StateHistory]:
         """
         Entraîne la puce sur toutes les données
         -> résout l'équation de Lindblad drive après drive pour plusieurs valeurs possibles du couple
@@ -49,7 +47,7 @@ class JpcChip:
 
         Parameters
         ----------
-        X : jnp.ndarray
+        X : Array
             données d'entraînement encodées en amplitude du drive
         quantum_parameters_list : list[QuantumParameters]
         Returns
@@ -63,21 +61,21 @@ class JpcChip:
         """
 
         nb_simulations = len(quantum_parameters_list)
-        time_interval = jnp.linspace(0, self.quantum_constants.DRIVE_DURATION * X.size,
-                                     self.simulation_params.SIMULATION_RESOLUTION * X.size)
-        psi = self.quantum_constants.vacuum_state
-        tab_data = np.repeat(X, self.simulation_params.SIMULATION_RESOLUTION)[:-1]
+        time_interval = jnp.linspace(0, self.config.DRIVE_DURATION * X.size,
+                                     self.config.SIMULATION_RESOLUTION * X.size)
+        psi = self.config.vacuum_state
+        tab_data = np.repeat(X, self.config.SIMULATION_RESOLUTION)[:-1]
 
-        H_drive = dq.pwc(time_interval, tab_data, self.quantum_constants.Hd)
+        H_drive = dq.pwc(time_interval, tab_data, self.config.Hd)
         H0s = dq.stack([
-            self.quantum_constants.H0(quantum_parameters)
+            self.config.H0(quantum_parameters)
             for quantum_parameters in quantum_parameters_list
         ])
         H = H0s + H_drive
 
-        result = dq.mesolve(H, self.quantum_constants.jump_ops, psi, time_interval,
-                            exp_ops=self.quantum_constants.exp_ops,
+        result = dq.mesolve(H, self.config.jump_ops, psi, time_interval,
+                            exp_ops=self.config.exp_ops,
                             options=dq.Options(cartesian_batching=False, progress_meter=True, save_states=True))
 
-        return [StateHistory(self.simulation_params, self.quantum_constants, result.expects[i], result.states[i],
+        return [StateHistory(self.config, result.expects[i], result.states[i],
                              time_interval) for i in range(nb_simulations)]

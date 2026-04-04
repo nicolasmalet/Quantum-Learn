@@ -18,14 +18,6 @@ batch_sizes = VariationConfig(
     values=[[3], [10], [30]]
 )
 
-measure_resolution = VariationConfig(
-    name="Measure Resolution",
-    param=[paths.MEASURE_RESOLUTION, paths.INPUT_DIM, paths.SIMULATION_RESOLUTION],
-    values=[[1, nb_quadratures * NB_POINTS_PER_PERIOD * 1, 100],
-            [10, nb_quadratures * NB_POINTS_PER_PERIOD * 10, 100],
-            [100, nb_quadratures * NB_POINTS_PER_PERIOD * 100, 100]]
-)
-
 quantum_lr = VariationConfig(
     name="quantum_lr",
     param=[paths.QUANTUM_LR],

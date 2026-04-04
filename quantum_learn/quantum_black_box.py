@@ -1,22 +1,22 @@
 from dataclasses import dataclass, fields
 
+import numpy as np
 from zeroth.zeroth_order.gradient_estimators import GradientEstimator
 from zeroth.zeroth_order.zeroth_order_blackbox import ZerothOrderBlackBox
 
-from quantum_simulation.history import StateHistory
 from quantum_simulation.jpc_chip import JpcChip
-from quantum_simulation.parameters_and_constants.quantum_constants import QuantumConstants
+from quantum_simulation.parameters_and_constants.jpc_config import JPCConfig
 from quantum_simulation.parameters_and_constants.quantum_parameters import QuantumParameters, QuantumParametersConfig
-from quantum_simulation.parameters_and_constants.simulation_constants import SimulationConstants
+from .build_f import BuildF, BuildFConfig
 from .types import Array
 
 
 @dataclass
 class QuantumBlackBoxConfig:
     name: str
-    quantum_constants: QuantumConstants
+    jpc_config: JPCConfig
     quantum_parameters: QuantumParametersConfig
-    simulation_constants: SimulationConstants
+    build_f_config: BuildFConfig
 
     def instantiate(self):
         return QuantumBlackBox(self)
@@ -28,10 +28,15 @@ class QuantumBlackBox(ZerothOrderBlackBox):
         self.params: QuantumParameters = config.quantum_parameters.instantiate()
         self.nb_params: int = len(fields(self.params))
 
-        self.quantum_constants = config.quantum_constants
-        self.simulation_constants = config.simulation_constants
+        self.jpc_config = config.jpc_config
 
-        self.simulator: JpcChip = JpcChip(config.quantum_constants, config.simulation_constants)
+        self.simulator: JpcChip = JpcChip(config.jpc_config)
+
+        self.build_f: BuildF = config.build_f_config.instantiate(config.jpc_config)
+        self.output_dim = self.build_f.output_dim
+
+    def __call__(self, X: Array) -> Array:
+        return self.forward(X)
 
     def get_params(self) -> QuantumParameters:
         return self.params
@@ -39,7 +44,7 @@ class QuantumBlackBox(ZerothOrderBlackBox):
     def init_params(self, quantum_params: QuantumParameters) -> None:
         self.params = quantum_params
 
-    def forward(self, X: Array) -> StateHistory:
+    def forward(self, X: Array) -> Array:
         """Standard forward pass using the current nominal weights.
 
         Args:
@@ -48,9 +53,12 @@ class QuantumBlackBox(ZerothOrderBlackBox):
         Returns:
             Array: Output. Shape: (output_dim, batch_size).
         """
-        return self.simulator.run_simulation(X, [self.params])[0]
+        state_history = self.simulator.run_simulation(X, [self.params])[0]
 
-    def forward_perturbed(self, X: Array, gradient_estimator: GradientEstimator) -> list[StateHistory]:
+        F = self.build_f(state_history)
+        return F
+
+    def forward_perturbed(self, X: Array, gradient_estimator: GradientEstimator) -> Array:
         """Parallel forward pass for multiple perturbed versions of the network.
 
         This method broadcasts the input X across T perturbed parameter sets
@@ -61,7 +69,11 @@ class QuantumBlackBox(ZerothOrderBlackBox):
             gradient_estimator (GradientEstimator): The gradient_estimator object.
         """
         perturbed_params = [QuantumParameters(*params) for params in gradient_estimator.perturb(self.params.as_array())]
-        return self.simulator.run_simulation(X, perturbed_params)
+        state_history_list = self.simulator.run_simulation(X, perturbed_params)
+        F_pred_list = [self.build_f(state_history) for state_history in state_history_list]
+        perturbed_F_pred = np.stack(F_pred_list, axis=0)
+
+        return perturbed_F_pred
 
     def update_params(self, grad: Array, learning_rate: float) -> None:
         """

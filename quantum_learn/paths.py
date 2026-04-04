@@ -11,4 +11,3 @@ SIMULATION_RESOLUTION = "quantum_network_config.simulation_params.SIMULATION_RES
 BATCH_SIZE = "batch_size"
 EPOCHS = "epochs"
 
-INPUT_DIM = "neural_network_config.layers_config.0.input_dim"

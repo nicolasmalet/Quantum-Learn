@@ -1,17 +1,18 @@
 from zeroth import first_order
-from zeroth.abstract import NeuralNetworkConfig, LayerConfig
-from zeroth.utils.activation_functions import softmax
+from zeroth.abstract import NeuralNetworkConfig, NetworkArchitecture
+from zeroth.utils.activation_functions import Softmax, ReLU
 
-from .data_config import measure_resolution
-from ..task_constants import NB_CLASS, NB_POINTS_PER_PERIOD
-
-nb_quadratures = 4
-input_dim = nb_quadratures * NB_POINTS_PER_PERIOD * measure_resolution
-output_dim = NB_CLASS
 
 linear: NeuralNetworkConfig = NeuralNetworkConfig(
     name="Linear",
-    layers_config=[LayerConfig(input_dim=input_dim, output_dim=output_dim, f=softmax)]
+    architecture=NetworkArchitecture(hidden_dims=[],
+                                     activations=[Softmax()])
+)
+
+XS: NeuralNetworkConfig = NeuralNetworkConfig(
+    name="xs",
+    architecture=NetworkArchitecture(hidden_dims=[10],
+                                     activations=[ReLU(), Softmax()])
 )
 
 first_order_adam = first_order.FirstOrderAdamConfig(learning_rate=0.02,

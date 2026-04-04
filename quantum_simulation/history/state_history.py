@@ -4,6 +4,7 @@ import numpy as np
 
 from .photon_distribution import PhotonDistribution
 from .quadratures import Quadratures
+from ..parameters_and_constants import JPCConfig
 
 
 class StateHistory:
@@ -11,16 +12,15 @@ class StateHistory:
     Docstring to do.
     """
 
-    def __init__(self, simulation_params, quantum_params, expects, states, time_interval):
-        self.simulation_params = simulation_params
-        self.quantum_parameters = quantum_params
+    def __init__(self, jpc_config: JPCConfig, expects, states, time_interval):
+        self.jpc_config: JPCConfig = jpc_config
         self.expects = expects
         self.states = states
         self.time_interval = time_interval
-        self.photon_distribution = PhotonDistribution(simulation_params, quantum_params, states, time_interval)
+        self.photon_distribution = PhotonDistribution(jpc_config, states, time_interval)
         self.quadratures = Quadratures(expects)
-        self.DIM_A = self.quantum_parameters.DIM_A
-        self.DIM_B = self.quantum_parameters.DIM_B
+        self.DIM_A = self.jpc_config.DIM_A
+        self.DIM_B = self.jpc_config.DIM_B
 
     def plot_trace_verification(self):
         """
@@ -28,12 +28,12 @@ class StateHistory:
         Les deux doivent être égaux à 1 à tout instant (normalisation de rho).
         """
         # --- Calcul mode a ---
-        comm_a = self.quantum_parameters.a @ self.quantum_parameters.a_dag - self.quantum_parameters.a_dag @ self.quantum_parameters.a
+        comm_a = self.jpc_config.a @ self.jpc_config.a_dag - self.jpc_config.a_dag @ self.jpc_config.a
         comm_a_full = dq.tensor(comm_a, dq.eye(self.DIM_B))
         trace_a = np.array(dq.expect(comm_a_full, self.states).real)
 
         # --- Calcul mode b ---
-        comm_b = self.quantum_parameters.b @ self.quantum_parameters.b_dag - self.quantum_parameters.b_dag @ self.quantum_parameters.b
+        comm_b = self.jpc_config.b @ self.jpc_config.b_dag - self.jpc_config.b_dag @ self.jpc_config.b
         comm_b_full = dq.tensor(dq.eye(self.DIM_A), comm_b)
         trace_b = np.array(dq.expect(comm_b_full, self.states).real)
 

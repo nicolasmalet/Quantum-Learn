@@ -3,13 +3,14 @@ from __future__ import annotations
 from dataclasses import dataclass, fields
 
 import numpy as np
+from zeroth.abstract import Summary
 
 
 @dataclass(frozen=False)
-class QuantumParameters:
+class QuantumParameters(Summary):
     g_conv_real: float
-    g_conv_imag: float
     g_sq_real: float
+    g_conv_imag: float
     g_sq_imag: float
     delta_a: float
     delta_b: float
@@ -33,13 +34,13 @@ class QuantumParameters:
 
 
 @dataclass(frozen=True, kw_only=True)
-class QuantumParametersConfig:
+class QuantumParametersConfig(Summary):
     g_conv_real: float
-    g_conv_imag: float
     g_sq_real: float
-    g_sq_imag: float
-    delta_a: float
-    delta_b: float
+    g_conv_imag: float = 0
+    g_sq_imag: float = 0
+    delta_a: float = 0
+    delta_b: float = 0
 
     @classmethod
     def get_indices(cls, *names: str) -> list[int]:
@@ -48,8 +49,8 @@ class QuantumParametersConfig:
 
     def instantiate(self) -> QuantumParameters:
         return QuantumParameters(g_conv_real=self.g_conv_real,
-                                 g_conv_imag=self.g_conv_imag,
                                  g_sq_real=self.g_sq_real,
+                                 g_conv_imag=self.g_conv_imag,
                                  g_sq_imag=self.g_sq_imag,
-                                 delta_a = self.delta_a,
-                                 delta_b = self.delta_b)
+                                 delta_a=self.delta_a,
+                                 delta_b=self.delta_b)

@@ -1,3 +1,2 @@
-from .quantum_constants import QuantumConstants
+from .jpc_config import JPCConfig
 from .quantum_parameters import QuantumParameters, QuantumParametersConfig
-from .simulation_constants import SimulationConstants

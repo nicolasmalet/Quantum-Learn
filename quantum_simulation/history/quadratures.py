@@ -1,27 +1,20 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ..parameters_and_constants.simulation_constants import SimulationConstants
-
 
 class Quadratures:
     """
-    Quadratures -> feature matrix
-
     This class implements a la structure de données qui stocke les quadratures
     du champ réfléchi au fil de l'évolution de l'état de la puce sous l'effet
     des drives (entraînement ou test)
 
     Parameters
     ----------
-    params: SimulationConstants
     expects
 
     Attributes
     ----------
-
-    self.build_F : ndarray
-        Build la feature matrix F(X)
+    self.plot
 
     Notes
     -----
