@@ -67,11 +67,15 @@ class JpcChip:
         tab_data = np.repeat(X, self.config.SIMULATION_RESOLUTION)[:-1]
 
         H_drive = dq.pwc(time_interval, tab_data, self.config.Hd)
+
         H0s = dq.stack([
             self.config.H0(quantum_parameters)
             for quantum_parameters in quantum_parameters_list
         ])
-        H = H0s + H_drive
+
+        H_encode = dq.pwc(time_interval, tab_data, self.config.H_encode)
+
+        H = H0s + H_encode
 
         result = dq.mesolve(H, self.config.jump_ops, psi, time_interval,
                             exp_ops=self.config.exp_ops,

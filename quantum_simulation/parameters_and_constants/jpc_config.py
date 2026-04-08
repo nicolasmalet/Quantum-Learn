@@ -53,8 +53,7 @@ class JPCConfig(Summary):
     K_BB: float
     K_AB: float
 
-    EPSILON_A: float
-    EPSILON_B: float
+    g_sq: float
     DRIVE_DURATION: float
 
     MEASURE_RESOLUTION: int
@@ -77,10 +76,10 @@ class JPCConfig(Summary):
                                                                                self.H_kerr_b) + self.H_cross
 
         self.H_da = dq.tensor(
-            1j * jnp.sqrt(self.KAPPA_A) * (self.EPSILON_A.conjugate() * self.a - self.EPSILON_A * self.a_dag),
+            jnp.sqrt(self.KAPPA_A) * (self.a + self.a_dag),
             dq.eye(self.DIM_B))
-        self.H_db = dq.tensor(dq.eye(self.DIM_A), 1j * jnp.sqrt(self.KAPPA_B) * (
-                self.EPSILON_B.conjugate() * self.b - self.EPSILON_B * self.b_dag))
+        self.H_db = dq.tensor(dq.eye(self.DIM_A), jnp.sqrt(self.KAPPA_B) * (
+                self.b + self.b_dag))
         self.Hd = self.H_da + self.H_db
 
         self.vacuum_state = dq.tensor(dq.basis(self.DIM_A, 0),
@@ -89,6 +88,8 @@ class JPCConfig(Summary):
                          jnp.sqrt(self.KAPPA_B) * dq.tensor(dq.eye(self.DIM_A), self.b)]  # Opérateurs de dissipation
         self.exp_ops = [dq.tensor(self.a, dq.eye(self.DIM_B)),
                         dq.tensor(dq.eye(self.DIM_A), self.b)]  # Valeurs moyennes à calculer
+        self.H_encode = self.g_sq * ( dq.tensor(self.a, self.b) + dq.tensor(self.a_dag, self.b_dag))
+        
 
     def H0(self, quantum_parameters: QuantumParameters):
         """
@@ -103,21 +104,17 @@ class JPCConfig(Summary):
         dynamiqs.qarrays.sparsedia_qarray.SparseDIAQArray (Dynamiqs Hamiltonian)
             Free-drive hamiltonian = Kerr effet + JRM contributions (conversion AND two mode squeezing)
         """
-        g_conv_real = quantum_parameters.g_conv_real
-        g_conv_imag = quantum_parameters.g_conv_imag
-        g_sq_real = quantum_parameters.g_sq_real
-        g_sq_imag = quantum_parameters.g_sq_imag
-        g_conv = g_conv_real + 1j * g_conv_imag
-        g_conv_conj = g_conv_real - 1j * g_conv_imag
-        g_sq = g_sq_real + 1j * g_sq_imag
-        g_sq_conj = g_sq_real - 1j * g_sq_imag
+        g_conv = quantum_parameters.g_conv
+        epsilon_a = quantum_parameters.epsilon_a
+        epsilon_b = quantum_parameters.epsilon_b
         delta_a = quantum_parameters.delta_a
         delta_b = quantum_parameters.delta_b
 
         return (self.H_kerr
                 + delta_a * self.Ha
                 + delta_b * self.Hb
-                + g_conv_conj * dq.tensor(self.a, self.b_dag)
-                + g_conv * dq.tensor(self.a_dag, self.b)
-                + g_sq_conj * dq.tensor(self.a, self.b)
-                + g_sq * dq.tensor(self.a_dag, self.b_dag))
+                + g_conv * ( dq.tensor(self.a, self.b_dag) + dq.tensor(self.a_dag, self.b) )
+                + self.H_da * epsilon_a
+                + self.H_db * epsilon_b
+                + 0.1 * self.g_sq * ( dq.tensor(self.a, self.b) + dq.tensor(self.a_dag, self.b_dag))
+        )

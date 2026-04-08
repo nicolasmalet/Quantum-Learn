@@ -8,10 +8,9 @@ from zeroth.abstract import Summary
 
 @dataclass(frozen=False)
 class QuantumParameters(Summary):
-    g_conv_real: float
-    g_sq_real: float
-    g_conv_imag: float
-    g_sq_imag: float
+    g_conv: float
+    epsilon_a: float
+    epsilon_b: float
     delta_a: float
     delta_b: float
 
@@ -35,10 +34,9 @@ class QuantumParameters(Summary):
 
 @dataclass(frozen=True, kw_only=True)
 class QuantumParametersConfig(Summary):
-    g_conv_real: float
-    g_sq_real: float
-    g_conv_imag: float = 0
-    g_sq_imag: float = 0
+    g_conv: float
+    epsilon_a: float
+    epsilon_b: float
     delta_a: float = 0
     delta_b: float = 0
 
@@ -48,9 +46,8 @@ class QuantumParametersConfig(Summary):
         return [all_fields[name] for name in names]
 
     def instantiate(self) -> QuantumParameters:
-        return QuantumParameters(g_conv_real=self.g_conv_real,
-                                 g_sq_real=self.g_sq_real,
-                                 g_conv_imag=self.g_conv_imag,
-                                 g_sq_imag=self.g_sq_imag,
+        return QuantumParameters(g_conv=self.g_conv,
+                                 epsilon_a=self.epsilon_a,
+                                 epsilon_b=self.epsilon_b,
                                  delta_a=self.delta_a,
                                  delta_b=self.delta_b)
