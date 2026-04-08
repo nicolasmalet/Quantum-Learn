@@ -114,8 +114,10 @@ class JPCConfig(Summary):
         delta_a = quantum_parameters.delta_a
         delta_b = quantum_parameters.delta_b
 
-        return self.H_kerr + delta_a * self.Ha + delta_b * self.Hb + (g_conv_conj *
-                                                                      dq.tensor(self.a,
-                                                                                self.b_dag) + g_conv * dq.tensor(
-                    self.a_dag, self.b)) + (
-                g_sq_conj * dq.tensor(self.a, self.b) + g_sq * dq.tensor(self.a_dag, self.b_dag))
+        return (self.H_kerr
+                + delta_a * self.Ha
+                + delta_b * self.Hb
+                + g_conv_conj * dq.tensor(self.a, self.b_dag)
+                + g_conv * dq.tensor(self.a_dag, self.b)
+                + g_sq_conj * dq.tensor(self.a, self.b)
+                + g_sq * dq.tensor(self.a_dag, self.b_dag))

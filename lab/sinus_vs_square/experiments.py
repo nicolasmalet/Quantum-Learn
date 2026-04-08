@@ -1,6 +1,6 @@
 from zeroth.experiment import ExperimentConfig
 
-from . import models, variations
+from ..config import models, variations
 from .data import data_creator
 
 SMOOTH_FRACTION = 0.05
@@ -12,14 +12,6 @@ test_experiment: ExperimentConfig = ExperimentConfig(name="test_experiment",
                                                      data_creator=data_creator,
                                                      plot_dimension=0,
                                                      smooth_fraction=SMOOTH_FRACTION)
-
-measure_resolution: ExperimentConfig = ExperimentConfig(name="measure_resolution",
-                                                        title="Measure Resolution",
-                                                        base_model=models.quantum_model_config,
-                                                        variations=[variations.measure_resolution],
-                                                        data_creator=data_creator,
-                                                        plot_dimension=0,
-                                                        smooth_fraction=SMOOTH_FRACTION)
 
 quantum_lr: ExperimentConfig = ExperimentConfig(name="quantum_lr",
                                                 title="Training Loss vs Chip Parameters LR",

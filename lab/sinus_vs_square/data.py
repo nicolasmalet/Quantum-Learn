@@ -2,8 +2,7 @@ import numpy as np
 from zeroth.abstract import DataCreator
 from zeroth.data import Data
 
-from .config.data_config import nb_period_train, nb_period_test
-from .task_constants import NB_POINTS_PER_PERIOD
+from .task_constants import NB_POINTS_PER_PERIOD, NB_CLASS
 
 
 class DataCreatorSinus(DataCreator):
@@ -27,10 +26,10 @@ class DataCreatorSinus(DataCreator):
         for i in range(self.nb_periods_test):
             X_test[i, :] = sinus if Y_test[i, 0] == 1 else square
 
-        return Data(X_train, Y_train, X_test, Y_test)
+        return Data(X_train, Y_train, X_test, Y_test, NB_CLASS)
 
 
 data_creator = DataCreatorSinus(
-    nb_periods_train=nb_period_train,
-    nb_periods_test=nb_period_test
+    nb_periods_train=300,
+    nb_periods_test=10
 )

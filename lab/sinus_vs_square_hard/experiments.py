@@ -1,6 +1,6 @@
 from zeroth.experiment import ExperimentConfig
 
-from . import models, variations
+from ..config import models, variations
 from .data import data_creator
 
 SMOOTH_FRACTION = 0.05
@@ -23,12 +23,12 @@ quantum_lr: ExperimentConfig = ExperimentConfig(name="quantum_lr",
                                                 smooth_fraction=SMOOTH_FRACTION)
 
 no_quantum_learning_xs: ExperimentConfig = ExperimentConfig(name="no_quantum_learning",
-                                                         title="Training loss vs no quantum learning",
-                                                         base_model=models.no_quantum_learning_model_xs,
-                                                         variations=[],
-                                                         data_creator=data_creator,
-                                                         plot_dimension=0,
-                                                         smooth_fraction=SMOOTH_FRACTION)
+                                                            title="Training loss vs no quantum learning",
+                                                            base_model=models.no_quantum_learning_model_xs,
+                                                            variations=[],
+                                                            data_creator=data_creator,
+                                                            plot_dimension=0,
+                                                            smooth_fraction=SMOOTH_FRACTION)
 
 no_quantum_learning_vs_nn_sizes = ExperimentConfig(name="no_quantum_learning_vs_nn_sizes",
                                                    title="Training loss, no quantum learning",
@@ -47,28 +47,28 @@ photon: ExperimentConfig = ExperimentConfig(name="photon",
                                             smooth_fraction=SMOOTH_FRACTION)
 
 dudas: ExperimentConfig = ExperimentConfig(name="dudas",
-                                            title="Training Loss Dudas",
-                                            base_model=models.quantum_model_config_dudas,
-                                            variations=[],
-                                            data_creator=data_creator,
-                                            plot_dimension=0,
-                                            smooth_fraction=SMOOTH_FRACTION)
+                                           title="Training Loss Dudas",
+                                           base_model=models.quantum_model_config_dudas,
+                                           variations=[],
+                                           data_creator=data_creator,
+                                           plot_dimension=0,
+                                           smooth_fraction=SMOOTH_FRACTION)
 
 dudas_network_size: ExperimentConfig = ExperimentConfig(name="dudas_network_size",
-                                            title="Training Loss Dudas",
-                                            base_model=models.quantum_model_config_dudas,
-                                            variations=[variations.classical_network_size],
-                                            data_creator=data_creator,
-                                            plot_dimension=0,
-                                            smooth_fraction=SMOOTH_FRACTION)
+                                                        title="Training Loss Dudas",
+                                                        base_model=models.quantum_model_config_dudas,
+                                                        variations=[variations.classical_network_size],
+                                                        data_creator=data_creator,
+                                                        plot_dimension=0,
+                                                        smooth_fraction=SMOOTH_FRACTION)
 
 dudas_train_all_params: ExperimentConfig = ExperimentConfig(name="dudas_all_params",
-                                            title="Training Loss Dudas",
-                                            base_model=models.quantum_model_config_dudas_train_all,
-                                            variations=[],
-                                            data_creator=data_creator,
-                                            plot_dimension=0,
-                                            smooth_fraction=SMOOTH_FRACTION)
+                                                            title="Training Loss Dudas",
+                                                            base_model=models.quantum_model_config_dudas_train_all,
+                                                            variations=[],
+                                                            data_creator=data_creator,
+                                                            plot_dimension=0,
+                                                            smooth_fraction=SMOOTH_FRACTION)
 
 no_quantum_learning_vs_quantum_learning_dudas = ExperimentConfig(name="dudas",
                                                                  title="quantum learning vs not",

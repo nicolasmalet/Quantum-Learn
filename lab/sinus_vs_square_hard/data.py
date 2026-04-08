@@ -2,7 +2,6 @@ import numpy as np
 from zeroth.abstract import DataCreator
 from zeroth.data import Data
 
-from .config.data_config import nb_period_train, nb_period_test
 from .task_constants import NB_POINTS_PER_PERIOD
 
 
@@ -36,5 +35,5 @@ class DataCreatorSinusHard(DataCreator):
         return Data(raw_X_train=X_train, raw_Y_train=Y_train, raw_X_test=X_test, raw_Y_test=Y_test, nb_class=2)
 
 
-data_creator = DataCreatorSinusHard(nb_periods_train=nb_period_train,
-                                    nb_periods_test=nb_period_test)
+data_creator = DataCreatorSinusHard(nb_periods_train=300,
+                                    nb_periods_test=10)
