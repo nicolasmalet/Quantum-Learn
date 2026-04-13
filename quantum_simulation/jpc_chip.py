@@ -39,7 +39,7 @@ class JpcChip:
     def __init__(self, jpc_config: JPCConfig):
         self.config: JPCConfig = jpc_config
 
-    def run_simulation(self, X: Array, quantum_parameters_list: list[QuantumParameters]) -> list[StateHistory]:
+    def run_simulation(self, X: Array, quantum_parameters_list: list[QuantumParameters], encoding_observable) -> list[StateHistory]:
         """
         Entraîne la puce sur toutes les données
         -> résout l'équation de Lindblad drive après drive pour plusieurs valeurs possibles du couple
@@ -66,16 +66,15 @@ class JpcChip:
         psi = self.config.vacuum_state
         tab_data = np.repeat(X, self.config.SIMULATION_RESOLUTION)[:-1]
 
-        H_drive = dq.pwc(time_interval, tab_data, self.config.Hd)
+        def f_encode(X, data):
+            return data * X
 
-        H0s = dq.stack([
-            self.config.H0(quantum_parameters)
-            for quantum_parameters in quantum_parameters_list
-        ])
 
-        H_encode = dq.pwc(time_interval, tab_data, self.config.H_encode)
+        #H_encode = dq.pwc(time_interval, tab_data, self.config.H_encode)
 
-        H = H0s + H_encode
+        H = self.config.H(quantum_parameters_list, tab_data, time_interval, f_encoding=f_encode, encoding_observable=encoding_observable)
+        #(self, quantum_parameters, data: jnp.array, time_interval: jnp.array, f_encoding,
+        #  encoding_type='amplitude', encoding_observable='epsilon')
 
         result = dq.mesolve(H, self.config.jump_ops, psi, time_interval,
                             exp_ops=self.config.exp_ops,

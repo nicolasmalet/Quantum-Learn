@@ -9,6 +9,7 @@ from zeroth.abstract import Summary
 @dataclass(frozen=False)
 class QuantumParameters(Summary):
     g_conv: float
+    g_sq: float
     epsilon_a: float
     epsilon_b: float
     delta_a: float
@@ -35,6 +36,7 @@ class QuantumParameters(Summary):
 @dataclass(frozen=True, kw_only=True)
 class QuantumParametersConfig(Summary):
     g_conv: float
+    g_sq: float
     epsilon_a: float
     epsilon_b: float
     delta_a: float = 0
@@ -47,6 +49,7 @@ class QuantumParametersConfig(Summary):
 
     def instantiate(self) -> QuantumParameters:
         return QuantumParameters(g_conv=self.g_conv,
+                                 g_sq=self.g_sq,
                                  epsilon_a=self.epsilon_a,
                                  epsilon_b=self.epsilon_b,
                                  delta_a=self.delta_a,

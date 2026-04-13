@@ -53,7 +53,6 @@ class JPCConfig(Summary):
     K_BB: float
     K_AB: float
 
-    g_sq: float
     DRIVE_DURATION: float
 
     MEASURE_RESOLUTION: int
@@ -69,18 +68,21 @@ class JPCConfig(Summary):
         self.Ha = dq.tensor(self.N_a, dq.eye(self.DIM_B))
         self.Hb = dq.tensor(dq.eye(self.DIM_A), self.N_b)
 
+        # Hamiltoniens effet Kerr
         self.H_kerr_a = self.K_AA * self.N_a @ self.N_a
         self.H_kerr_b = self.K_BB * self.N_b @ self.N_b
         self.H_cross = - self.K_AB * dq.tensor(self.N_a, self.N_b)
         self.H_kerr = dq.tensor(self.H_kerr_a, dq.eye(self.DIM_B)) + dq.tensor(dq.eye(self.DIM_A),
                                                                                self.H_kerr_b) + self.H_cross
 
+        # Hamiltoniens Drive
         self.H_da = dq.tensor(
             jnp.sqrt(self.KAPPA_A) * (self.a + self.a_dag),
             dq.eye(self.DIM_B))
         self.H_db = dq.tensor(dq.eye(self.DIM_A), jnp.sqrt(self.KAPPA_B) * (
                 self.b + self.b_dag))
-        self.Hd = self.H_da + self.H_db
+        
+
 
         self.vacuum_state = dq.tensor(dq.basis(self.DIM_A, 0),
                                       dq.basis(self.DIM_B, 0))  # états initiaux === vaccum states
@@ -88,10 +90,27 @@ class JPCConfig(Summary):
                          jnp.sqrt(self.KAPPA_B) * dq.tensor(dq.eye(self.DIM_A), self.b)]  # Opérateurs de dissipation
         self.exp_ops = [dq.tensor(self.a, dq.eye(self.DIM_B)),
                         dq.tensor(dq.eye(self.DIM_A), self.b)]  # Valeurs moyennes à calculer
-        self.H_encode = self.g_sq * ( dq.tensor(self.a, self.b) + dq.tensor(self.a_dag, self.b_dag))
-        
 
-    def H0(self, quantum_parameters: QuantumParameters):
+
+    def H_delta(self, delta_a, delta_b):
+        return -delta_a * dq.tensor(self.N_a, dq.eye(self.DIM_B)) - delta_b * dq.tensor(dq.eye(self.DIM_A), self.N_b)
+    
+    def H_drive(self, epsilon_a, epsilon_b):
+        H_da = dq.tensor(
+            jnp.sqrt(self.KAPPA_A) * (epsilon_a.conjugate() * self.a + epsilon_a * self.a_dag),
+            dq.eye(self.DIM_B))
+        H_db = dq.tensor(dq.eye(self.DIM_A), jnp.sqrt(self.KAPPA_B) * (
+                epsilon_b.conjugate() * self.b + epsilon_b * self.b_dag))
+        return dq.tensor(H_da, dq.eye(self.DIM_A)) + dq.tensor(dq.eye(self.DIM_B), H_db)
+    
+    def H_conv(self, g_conv):
+        return g_conv.conjugate() * dq.tensor(self.a, self.b_dag) + g_conv * dq.tensor(self.a_dag, self.b)
+    
+    def H_sq(self, g_sq):
+        return g_sq.conjugate() * dq.tensor(self.a, self.b) + g_sq * dq.tensor(self.a_dag, self.b_dag)
+    
+    
+    def Build_H(self, quantum_parameters: QuantumParameters, encoding_observable='epsilon'):
         """
         Build the free-drive Hamiltonian.
 
@@ -105,16 +124,59 @@ class JPCConfig(Summary):
             Free-drive hamiltonian = Kerr effet + JRM contributions (conversion AND two mode squeezing)
         """
         g_conv = quantum_parameters.g_conv
+        g_sq = quantum_parameters.g_sq
         epsilon_a = quantum_parameters.epsilon_a
         epsilon_b = quantum_parameters.epsilon_b
         delta_a = quantum_parameters.delta_a
         delta_b = quantum_parameters.delta_b
 
-        return (self.H_kerr
-                + delta_a * self.Ha
-                + delta_b * self.Hb
-                + g_conv * ( dq.tensor(self.a, self.b_dag) + dq.tensor(self.a_dag, self.b) )
-                + self.H_da * epsilon_a
-                + self.H_db * epsilon_b
-                + 0.1 * self.g_sq * ( dq.tensor(self.a, self.b) + dq.tensor(self.a_dag, self.b_dag))
-        )
+        match encoding_observable:
+            case 'epsilon':
+                H = self.H_delta(delta_a, delta_b) + self.H_conv(g_conv) + self.H_sq(g_sq)
+            case 'g_conv':
+                H = self.H_delta(delta_a, delta_b) + self.H_drive(epsilon_a, epsilon_b) + self.H_sq(g_sq)
+            case 'g_sq':
+                H = self.H_delta(delta_a, delta_b) + self.H_drive(epsilon_a, epsilon_b) + self.H_conv(g_conv)
+
+        return H
+    
+    def Encode_Data(self, data:jnp.array, O:float):
+        O_encoded = data * O
+        return O_encoded
+    
+    def H(self, quantum_parameters, data: jnp.array, time_interval: jnp.array, f_encoding,
+          encoding_type='amplitude', encoding_observable='epsilon'):
+        '''Docstring to do.'''
+
+        H_free = [self.Build_H(quantum_parameter, encoding_observable=encoding_observable) for quantum_parameter in quantum_parameters]
+
+        match encoding_observable:
+            case 'epsilon':
+                epsilon_a = quantum_parameters[0].epsilon_a
+                epsilon_b = quantum_parameters[0].epsilon_b
+                values_a = f_encoding(epsilon_a, data)
+                values_b = f_encoding(epsilon_b, data)
+                H_encoded = (dq.pwc(time_interval, values_a, self.KAPPA_A * dq.tensor(self.a, dq.eye(self.DIM_B)))
+                     + dq.pwc(time_interval, jnp.conj(values_a), self.KAPPA_A * dq.tensor(self.a_dag, dq.eye(self.DIM_B)))
+                     + dq.pwc(time_interval, values_b, self.KAPPA_B * dq.tensor(dq.eye(self.DIM_A), self.b))
+                     + dq.pwc(time_interval, jnp.conj(values_b), self.KAPPA_B * dq.tensor(dq.eye(self.DIM_A), self.b_dag))
+                     )
+            case 'g_conv':
+                g_conv = quantum_parameters[0].g_conv
+                values = f_encoding(g_conv, data)
+                H_encoded = (dq.pwc(time_interval, values, dq.tensor(self.a_dag, self.b)) + 
+                            dq.pwc(time_interval, jnp.conj(values), dq.tensor(self.a, self.b_dag)))
+            case 'g_sq':
+                g_sq = quantum_parameters[0].g_sq
+                values = f_encoding(g_sq, data)
+                H_encoded = (dq.pwc(time_interval, values, dq.tensor(self.a_dag, self.b_dag)) + 
+                            dq.pwc(time_interval, jnp.conj(values), dq.tensor(self.a, self.b)))
+                
+        H = H_free + H_encoded
+        return H
+
+
+
+
+
+
