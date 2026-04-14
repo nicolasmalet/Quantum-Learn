@@ -1,5 +1,6 @@
 from dataclasses import dataclass, fields
 
+import jax.numpy as jnp
 import numpy as np
 from zeroth.zeroth_order.gradient_estimators import GradientEstimator
 from zeroth.zeroth_order.zeroth_order_blackbox import ZerothOrderBlackBox
@@ -53,7 +54,7 @@ class QuantumBlackBox(ZerothOrderBlackBox):
         Returns:
             Array: Output. Shape: (output_dim, batch_size).
         """
-        state_history = self.simulator.run_simulation(X, [self.params])[0]
+        state_history = self.simulator.run_simulation(jnp.array(X), [self.params])[0]
 
         F = self.build_f(state_history)
         return F
@@ -69,7 +70,7 @@ class QuantumBlackBox(ZerothOrderBlackBox):
             gradient_estimator (GradientEstimator): The gradient_estimator object.
         """
         perturbed_params = [QuantumParameters(*params) for params in gradient_estimator.perturb(self.params.as_array())]
-        state_history_list = self.simulator.run_simulation(X, perturbed_params)
+        state_history_list = self.simulator.run_simulation(jnp.array(X), perturbed_params)
         F_pred_list = [self.build_f(state_history) for state_history in state_history_list]
         perturbed_F_pred = np.stack(F_pred_list, axis=0)
 

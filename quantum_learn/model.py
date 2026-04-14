@@ -58,7 +58,9 @@ class QuantumModel(abstract.Model):
 
         self.training_loss = np.empty(nb_batches, dtype=np.float64)
 
+        nb_print = nb_batches if nb_print == -1 else nb_print
         print_indexes = np.linspace(0, nb_batches - 1, nb_print).astype(int)
+
         print(f"    Training {self.id} Model")
         for batch_idx, (X_train, Y_train) in enumerate(self.data):
             X_train = X_train.ravel()
@@ -71,7 +73,10 @@ class QuantumModel(abstract.Model):
             gradient = self.quantum_gradient_estimator.get_gradient(perturbed_Loss)
 
             F = perturbed_F_pred[0]
-            self.neural_network_optimizer.do_descent(self.neural_network, self.loss, F, Y_train)
+
+            for _ in range(100):
+                self.neural_network_optimizer.do_descent(self.neural_network, self.loss, F, Y_train)
+
             self.quantum_optimizer.update_params(self.quantum_blackbox, gradient)
 
             self.training_loss[batch_idx] = avg_loss

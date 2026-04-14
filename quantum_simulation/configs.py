@@ -10,15 +10,14 @@ jpc_config = JPCConfig(
     K_AA=0.1,
     K_BB=0.1,
     K_AB=0.05,
-    g_sq=20,
     DRIVE_DURATION=0.05,
     MEASURE_RESOLUTION=10,
     SIMULATION_RESOLUTION=10
 )
 
 jpc_config_dudas = JPCConfig(
-    DIM_A=15,
-    DIM_B=15,
+    DIM_A=10,
+    DIM_B=10,
     OMEGA_A=1e4,
     OMEGA_B=9 * 1e3,
     KAPPA_A=17,
@@ -26,7 +25,6 @@ jpc_config_dudas = JPCConfig(
     K_AA=0.1,
     K_BB=0.1,
     K_AB=0.05,
-    g_sq=20,
     DRIVE_DURATION=0.04,
     MEASURE_RESOLUTION=10,
     SIMULATION_RESOLUTION=10

@@ -3,7 +3,9 @@ from zeroth.utils.metrics import Accuracy
 
 from quantum_learn.model import QuantumModelConfig
 from lab.config import quantum_network_config as qn, neural_networks as nn
-from lab.config import batch_size
+
+
+batch_size = 10*8
 
 quantum_model_config_dudas = QuantumModelConfig(
     name="Quantum Model",
