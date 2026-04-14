@@ -12,66 +12,79 @@ class StateHistory:
     Docstring to do.
     """
 
-    def __init__(self, jpc_config: JPCConfig, expects, states, time_interval):
+    def __init__(self, jpc_config: JPCConfig, expects, time_interval):
         self.jpc_config: JPCConfig = jpc_config
         self.expects = expects
-        self.states = states
         self.time_interval = time_interval
-        self.photon_distribution = PhotonDistribution(jpc_config, states, time_interval)
+        self.photon_distribution = PhotonDistribution(jpc_config, expects, time_interval)
         self.quadratures = Quadratures(expects)
         self.DIM_A = self.jpc_config.DIM_A
         self.DIM_B = self.jpc_config.DIM_B
 
-    def plot_trace_verification(self):
+    def plot_commutator_verification(self, threshold_pct=5.0):
         """
-        Calcule et plot Tr([a, a†] rho(t)) et Tr([b, b†] rho(t)) en fonction du temps.
-        Les deux doivent être égaux à 1 à tout instant (normalisation de rho).
+        Vérifie la validité de la troncature via les commutateurs.
+        Affiche l'intervalle 1 +/- seuil% et le pourcentage de réussite.
         """
-        # --- Calcul mode a ---
-        comm_a = self.jpc_config.a @ self.jpc_config.a_dag - self.jpc_config.a_dag @ self.jpc_config.a
-        comm_a_full = dq.tensor(comm_a, dq.eye(self.DIM_B))
-        trace_a = np.array(dq.expect(comm_a_full, self.states).real)
-
-        # --- Calcul mode b ---
-        comm_b = self.jpc_config.b @ self.jpc_config.b_dag - self.jpc_config.b_dag @ self.jpc_config.b
-        comm_b_full = dq.tensor(dq.eye(self.DIM_A), comm_b)
-        trace_b = np.array(dq.expect(comm_b_full, self.states).real)
-
-        tsave_np = np.array(self.time_interval)
-        ecart_a = np.abs(trace_a - 1.0).max()
-        ecart_b = np.abs(trace_b - 1.0).max()
-        valid_a = ecart_a < 5 * 1e-2
-        valid_b = ecart_b < 5 * 1e-2
-
-        # --- Plot ---
-        fig, (ax_a, ax_b) = plt.subplots(2, 1, figsize=(8, 7), sharex=True)
-
-        for ax, trace, ecart, valid, mode in zip(
-                [ax_a, ax_b],
-                [trace_a, trace_b],
-                [ecart_a, ecart_b],
-                [valid_a, valid_b],
-                ["a", "b"]
-        ):
-            comm_label = rf"$\mathrm{{Tr}}([{mode},{mode}^\dagger]\rho(t))$"
-
-            ax.plot(tsave_np, trace, color="steelblue", lw=1.5, label=comm_label)
-            ax.axhline(1.0, color="green", lw=1, ls="--", label="Référence = 1")
-            ax.axhline(1.05, color="red", lw=1, ls=":", label="Seuil ±5%")
-            ax.axhline(0.95, color="red", lw=1, ls=":")
-            ax.fill_between(tsave_np, 0.95, 1.05, color="green", alpha=0.1)
-
-            ax.set_ylabel(comm_label)
-            ax.set_title(
-                rf"Mode ${mode}$ — Ecart max = {ecart:.2e} — " +
-                ("Valide à 1%" if valid else "Invalide à 5%")
-            )
-            ax.legend(loc="upper right")
-            ax.grid(True, alpha=0.3)
-
-        ax_b.set_xlabel("Temps")
-        fig.suptitle(r"Vérification de la normalisation de $\rho(t)$", fontsize=13)
-        plt.tight_layout()
+        p_last_a = self.photon_distribution.P_a[:, -1]
+        p_last_b = self.photon_distribution.P_b[:, -1]
+        
+        # Formule du commutateur tronqué
+        comm_a = 1 - self.jpc_config.DIM_A * p_last_a
+        comm_b = 1 - self.jpc_config.DIM_B * p_last_b
+        
+        # Définition des bornes
+        threshold = threshold_pct / 100.0
+        lower, upper = 1.0 - threshold, 1.0 + threshold
+        
+        # Calcul du pourcentage de temps passé dans l'intervalle
+        valid_a = np.mean((comm_a >= lower) & (comm_a <= upper)) * 100
+        valid_b = np.mean((comm_b >= lower) & (comm_b <= upper)) * 100
+        
+        plt.figure(figsize=(10, 5))
+        plt.plot(self.time_interval, comm_a, label=r"$\langle [a, a^\dagger] \rangle$")
+        plt.plot(self.time_interval, comm_b, label=r"$\langle [b, b^\dagger] \rangle$")
+        
+        # Affichage de l'intervalle de confiance (zone grise)
+        plt.fill_between(self.time_interval, lower, upper, color='gray', alpha=0.2, 
+                         label=f"Intervalle de confiance ({threshold_pct}%)")
+        plt.axhline(y=1.0, color='r', linestyle='--', alpha=0.5)
+        
+        # Informations au-dessus du graphe
+        plt.title(f"Score de validité : Mode A ({valid_a:.1f}%) | Mode B ({valid_b:.1f}%)\n"
+                  f"Vérification de la troncature (Seuil: {threshold_pct}%)")
+        plt.xlabel("Temps (μs)")
+        plt.ylabel("Valeur moyenne")
+        plt.ylim(0.5, 1.1) # Centré sur 1 avec de la place pour voir la chute
+        plt.legend()
+        plt.grid(True, alpha=0.3)
         plt.show()
 
-        return trace_a, trace_b
+
+    def plot_trace_integrity(self):
+        """
+        Vérifie que la somme des probabilités vaut 1.
+        Affiche la moyenne et la variance au-dessus du graphe.
+        """
+        # La trace est la somme de la probabilité jointe P(na, nb)
+        trace = self.photon_distribution.joint_proba.sum(axis=(1, 2))
+        
+        avg_trace = np.mean(trace)
+        var_trace = np.var(trace)
+        
+        plt.figure(figsize=(10, 5))
+        plt.plot(self.time_interval, trace, label=r"Tr($\rho$)", color="forestgreen")
+        plt.axhline(y=1.0, color='black', linestyle='-', linewidth=1, alpha=0.5)
+        
+        # Centrage de l'affichage : on prend une marge de +/- 0.05 autour de la moyenne
+        # ou au moins une zone couvrant le 1.0
+        plt.ylim(min(avg_trace, 1.0) - 0.05, max(avg_trace, 1.0) + 0.05)
+        
+        # Affichage des statistiques
+        plt.title(f"Moyenne Trace : {avg_trace:.6f} | Variance : {var_trace:.2e}\n"
+                  f"Vérification de l'intégrité de la Trace")
+        plt.xlabel("Temps (μs)")
+        plt.ylabel(r"Tr($\rho$)")
+        plt.legend()
+        plt.grid(True, alpha=0.3)
+        plt.show()
