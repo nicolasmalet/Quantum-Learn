@@ -8,7 +8,7 @@ from zeroth.zeroth_order.zeroth_order_blackbox import ZerothOrderBlackBox
 
 from quantum_simulation.jpc_chip import JpcChip
 from quantum_simulation.parameters_and_constants.jpc_config import JPCConfig
-from quantum_simulation.parameters_and_constants.quantum_parameters import QuantumParameters, QuantumParametersConfig
+from quantum_simulation.parameters_and_constants.quantum_parameters import QuantumParameters
 from .build_f import BuildF, BuildFConfig
 from .types import Array
 
@@ -17,7 +17,7 @@ from .types import Array
 class QuantumBlackBoxConfig(Summary):
     name: str
     jpc_config: JPCConfig
-    quantum_parameters: QuantumParametersConfig
+    quantum_parameters: QuantumParameters
     build_f_config: BuildFConfig
 
     def instantiate(self):
@@ -27,7 +27,7 @@ class QuantumBlackBoxConfig(Summary):
 class QuantumBlackBox(ZerothOrderBlackBox):
     def __init__(self, config: QuantumBlackBoxConfig) -> None:
         self.name: str = config.name
-        self.params: QuantumParameters = config.quantum_parameters.instantiate()
+        self.params: QuantumParameters = config.quantum_parameters
         self.nb_params: int = len(fields(self.params))
 
         self.jpc_config = config.jpc_config
@@ -58,7 +58,7 @@ class QuantumBlackBox(ZerothOrderBlackBox):
         state_history = self.simulator.run_simulation(jnp.array(X), [self.params])[0]
 
         F = self.build_f(state_history)
-        return F
+        return np.asarray(F)
 
     def forward_perturbed(self, X: Array, gradient_estimator: GradientEstimator) -> Array:
         """Parallel forward pass for multiple perturbed versions of the network.

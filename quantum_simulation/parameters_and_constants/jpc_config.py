@@ -55,7 +55,7 @@ class JPCConfig(Summary):
     MEASURE_RESOLUTION: int
     SIMULATION_RESOLUTION: int
 
-    encoding_observable: str = "epsilon"
+    encoding_observable: str = "g_sq"
     f_encoding: Callable[[float, jnp.ndarray], jnp.ndarray] = staticmethod(lambda X, data: data * X)
 
     def __post_init__(self) -> None:

@@ -31,5 +31,9 @@ jpc_config_dudas = JPCConfig(
     SIMULATION_RESOLUTION=100
 )
 
-quantum_parameters_config = QuantumParameters(g_conv=700, g_sq=70, epsilon_a=65, epsilon_b=65, delta_a=10,
-                                              delta_b=12)
+quantum_parameters_config = QuantumParameters(g_conv=900,
+                                              g_sq=180,
+                                              epsilon_a=170,
+                                              epsilon_b=170,
+                                              delta_a=0,
+                                              delta_b=0)

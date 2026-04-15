@@ -5,7 +5,7 @@ from zeroth.zeroth_order.gradient_estimators import PartialFiniteDifferenceConfi
 from quantum_learn import build_f
 from quantum_learn.quantum_black_box import QuantumBlackBoxConfig
 from quantum_simulation.configs import jpc_config, jpc_config_dudas, quantum_parameters_config
-from quantum_simulation.parameters_and_constants import QuantumParametersConfig
+from quantum_simulation.parameters_and_constants import QuantumParameters
 
 quantum_network_config = QuantumBlackBoxConfig(
     name="Q_Network",

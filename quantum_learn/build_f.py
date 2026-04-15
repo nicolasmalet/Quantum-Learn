@@ -3,9 +3,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
-import numpy as np
+import jax.numpy as jnp
 
-from quantum_learn.types import Array
 from quantum_simulation.history import StateHistory
 from quantum_simulation.parameters_and_constants import JPCConfig
 
@@ -19,11 +18,12 @@ class BuildFConfig(ABC):
 
 class BuildF(ABC):
     output_dim: int
+
     def __repr__(self):
         return f"{self.__class__.__name__}()"
 
     @abstractmethod
-    def __call__(self, state_history: StateHistory) -> Array:
+    def __call__(self, state_history: StateHistory) -> jnp.ndarray:
         ...
 
 
@@ -42,13 +42,13 @@ class BuildFQuadratures(BuildF):
         self.nb_quadratures = 4
         self.output_dim = self.nb_quadratures * self.jpc_config.MEASURE_RESOLUTION
 
-    def __call__(self, state_history: StateHistory) -> Array:
+    def __call__(self, state_history: StateHistory) -> jnp.ndarray:
         """
         Construit la feature matrix
 
         Returns
         -------
-        F : Array
+        F : jnp.ndarray
             Feature matrix F(X)
         """
 
@@ -62,9 +62,10 @@ class BuildFQuadratures(BuildF):
         L_Ib = L_Ib.reshape(-1, self.output_dim // self.nb_quadratures)
         L_Qb = L_Qb.reshape(-1, self.output_dim // self.nb_quadratures)
 
-        F = np.hstack((L_Ia, L_Qa, L_Ib, L_Qb))
+        F = jnp.hstack((L_Ia, L_Qa, L_Ib, L_Qb))
 
         return F
+
 
 @dataclass(frozen=True)
 class BuildFQuadraturesPolynomialsConfig(BuildFConfig):
@@ -81,14 +82,13 @@ class BuildFQuadraturesPolynomials(BuildF):
         self.nb_quadratures = 14
         self.output_dim = self.nb_quadratures * self.jpc_config.MEASURE_RESOLUTION
 
-
-    def __call__(self, state_history: StateHistory) -> Array:
+    def __call__(self, state_history: StateHistory) -> jnp.ndarray:
         """
         Construit la feature matrix
 
         Returns
         -------
-        F : Array
+        F : jnp.ndarray
             Feature matrix F(X)
         """
         L_Ia = state_history.quadratures.L_Ia[::self.step]
@@ -101,11 +101,12 @@ class BuildFQuadraturesPolynomials(BuildF):
         L_Ib = L_Ib.reshape(-1, self.output_dim // self.nb_quadratures)
         L_Qb = L_Qb.reshape(-1, self.output_dim // self.nb_quadratures)
 
-        F = np.hstack((L_Ia, L_Qa, L_Ib, L_Qb,
-                       L_Ia ** 2, L_Qa ** 2, L_Ib ** 2, L_Qb ** 2,
-                       L_Ia * L_Qa, L_Ia * L_Ib, L_Ia * L_Qb, L_Qa * L_Ib, L_Qa * L_Qb, L_Ib * L_Qb))
+        F = jnp.hstack((L_Ia, L_Qa, L_Ib, L_Qb,
+                        L_Ia ** 2, L_Qa ** 2, L_Ib ** 2, L_Qb ** 2,
+                        L_Ia * L_Qa, L_Ia * L_Ib, L_Ia * L_Qb, L_Qa * L_Ib, L_Qa * L_Qb, L_Ib * L_Qb))
 
         return F
+
 
 @dataclass(frozen=True)
 class BuildFPhotonDistributionConfig(BuildFConfig):
@@ -114,14 +115,14 @@ class BuildFPhotonDistributionConfig(BuildFConfig):
 
 
 class BuildFPhotonDistribution(BuildF):
-    def __init__(self, jpc_config: JPCConfig):
+    def __init__(self, jpc_config: JPCConfig, clip_probas: int):
         self.jpc_config: JPCConfig = jpc_config
 
         self.step = self.jpc_config.SIMULATION_RESOLUTION // self.jpc_config.MEASURE_RESOLUTION
+        self.clip_probas = clip_probas
+        self.output_dim = clip_probas ** 2 * self.jpc_config.MEASURE_RESOLUTION
 
-        self.output_dim = self.jpc_config.DIM_A * self.jpc_config.DIM_B * self.jpc_config.MEASURE_RESOLUTION
-
-    def __call__(self, state_history: StateHistory) -> Array:
-        measures = state_history.photon_distribution.joint_proba[::self.step, :, :]
+    def __call__(self, state_history: StateHistory) -> jnp.ndarray:
+        measures = state_history.photon_distribution.joint_proba[::self.step, :self.clip_probas, :self.clip_probas]
         F = measures.reshape(-1, self.output_dim)
         return F
