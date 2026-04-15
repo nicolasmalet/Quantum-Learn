@@ -4,7 +4,7 @@ import jax.numpy as jnp
 from .history.state_history import StateHistory
 from .parameters_and_constants.jpc_config import JPCConfig
 from .parameters_and_constants.quantum_parameters import QuantumParameters
-
+from .hamiltonian import Hamiltonian
 
 class JpcChip:
     """
@@ -37,6 +37,7 @@ class JpcChip:
 
     def __init__(self, jpc_config: JPCConfig):
         self.config: JPCConfig = jpc_config
+        self.hamiltonian = Hamiltonian(jpc_config)
 
     def run_simulation(self, X: jnp.ndarray, quantum_parameters_list: list[QuantumParameters]) -> list[StateHistory]:
         """
@@ -62,23 +63,19 @@ class JpcChip:
         nb_simulations = len(quantum_parameters_list)
         time_interval = jnp.linspace(0, self.config.DRIVE_DURATION * X.size,
                                      self.config.SIMULATION_RESOLUTION * X.size)
-        psi = self.config.vacuum_state
+        psi = self.hamiltonian.vacuum_state
         tab_data = jnp.repeat(X, self.config.SIMULATION_RESOLUTION)[:-1]
 
-        # H_encode = dq.pwc(time_interval, tab_data, self.config.H_encode)
-
-        H = self.config.H(quantum_parameters=quantum_parameters_list,
+        H = self.hamiltonian.H_tot(quantum_parameters_list=quantum_parameters_list,
                           data=tab_data,
                           time_interval=time_interval)
-        # (self, quantum_parameters, data: jnp.array, time_interval: jnp.array, f_encoding,
-        #  encoding_type='amplitude', encoding_observable='epsilon')
 
         methode_integration = dq.method.Dopri5(max_steps=1_000_000,
                                                atol=1e-8,
                                                rtol=1e-8)
 
-        result = dq.mesolve(H, self.config.jump_ops, psi, time_interval,
-                            exp_ops=self.config.exp_ops,
+        result = dq.mesolve(H, self.hamiltonian.jump_ops, psi, time_interval,
+                            exp_ops=self.hamiltonian.exp_ops,
                             method=methode_integration,
                             options=dq.Options(cartesian_batching=False, progress_meter=True,
                                                save_states=False))
