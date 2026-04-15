@@ -41,7 +41,8 @@ class QuantumModel(abstract.Model):
             self.quantum_gradient_estimator)
 
         self.neural_network: first_order.FirstOrderNeuralNetwork = first_order.FirstOrderNeuralNetwork(
-            config=config.neural_network_config, input_dim=self.quantum_blackbox.output_dim, output_dim=self.data.output_dim)
+            config=config.neural_network_config, input_dim=self.quantum_blackbox.output_dim,
+            output_dim=self.data.output_dim)
         self.neural_network_optimizer: first_order.FirstOrderOptimizer = config.neural_network_optimizer_config.instantiate()
 
     def train(self, nb_print: int = 0) -> None:

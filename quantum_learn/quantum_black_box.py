@@ -7,8 +7,7 @@ from zeroth.zeroth_order.gradient_estimators import GradientEstimator
 from zeroth.zeroth_order.zeroth_order_blackbox import ZerothOrderBlackBox
 
 from quantum_simulation.jpc_chip import JpcChip
-from quantum_simulation.parameters_and_constants.jpc_config import JPCConfig
-from quantum_simulation.parameters_and_constants.quantum_parameters import QuantumParameters
+from quantum_simulation.parameters_and_constants import JPCConfig, QuantumParameters
 from .build_f import BuildF, BuildFConfig
 from .types import Array
 

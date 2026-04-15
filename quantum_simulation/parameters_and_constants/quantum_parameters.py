@@ -3,9 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass, fields
 from typing import Callable
 
+import jax.numpy as jnp
 import numpy as np
 from zeroth.abstract import Summary
-import jax.numpy as jnp
+
 
 @dataclass(frozen=False)
 class QuantumParameters(Summary):

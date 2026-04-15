@@ -2,7 +2,6 @@ from zeroth import first_order
 from zeroth.abstract import NeuralNetworkConfig
 from zeroth.utils.activation_functions import Softmax, ReLU
 
-
 linear: NeuralNetworkConfig = NeuralNetworkConfig(
     name="Linear",
     hidden_dims=[],
@@ -14,7 +13,6 @@ XS: NeuralNetworkConfig = NeuralNetworkConfig(
     hidden_dims=[10],
     activations=[ReLU(), Softmax()]
 )
-
 
 first_order_adam = first_order.FirstOrderAdamConfig(learning_rate=0.02,
                                                     beta1=0.9,

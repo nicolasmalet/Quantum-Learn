@@ -1,11 +1,10 @@
 from zeroth.losses import CrossEntropy
 from zeroth.utils.metrics import Accuracy
 
-from quantum_learn.model import QuantumModelConfig
 from lab.config import quantum_network_config as qn, neural_networks as nn
+from quantum_learn.model import QuantumModelConfig
 
-
-batch_size = 10*8
+batch_size = 10 * 8
 
 quantum_model_config_dudas = QuantumModelConfig(
     name="Quantum Model",

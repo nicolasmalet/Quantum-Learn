@@ -19,14 +19,12 @@ class Hamiltonian:
         self.Ha = dq.tensor(self.N_a, dq.eye(self.jpc_config.DIM_B))
         self.Hb = dq.tensor(dq.eye(self.jpc_config.DIM_A), self.N_b)
 
-        # Hamiltoniens effet Kerr
         self.H_kerr_a = self.jpc_config.K_AA * self.N_a @ self.N_a
         self.H_kerr_b = self.jpc_config.K_BB * self.N_b @ self.N_b
         self.H_cross = - self.jpc_config.K_AB * dq.tensor(self.N_a, self.N_b)
         self.H_kerr = dq.tensor(self.H_kerr_a, dq.eye(self.jpc_config.DIM_B)) + dq.tensor(dq.eye(self.jpc_config.DIM_A),
-                                                                               self.H_kerr_b) + self.H_cross
+                                                                                          self.H_kerr_b) + self.H_cross
 
-        # Hamiltoniens Drive
         self.H_da = dq.tensor(
             jnp.sqrt(self.jpc_config.KAPPA_A) * (self.a + self.a_dag),
             dq.eye(self.jpc_config.DIM_B))
@@ -91,7 +89,6 @@ class Hamiltonian:
                 dq.pwc(time_interval, g_sq,
                        dq.tensor(self.a_dag, self.b_dag)))
 
-
     def H_tot(self, quantum_parameters_list: list[QuantumParameters], data: jnp.ndarray, time_interval: jnp.ndarray):
         """
         Assemble un Hamiltonien batché pour N simulations en parallèle.
@@ -103,14 +100,12 @@ class Hamiltonian:
         g_conv_vals = jnp.stack([p.get_value("g_conv", data) for p in quantum_parameters_list])
         g_sq_vals = jnp.stack([p.get_value("g_sq", data) for p in quantum_parameters_list])
 
-        H_static = self.H_kerr_a + self.H_kerr_b + self.H_cross
-
         H_batched = (
-            H_static +
-            self.H_delta(delta_a_vals, delta_b_vals, time_interval) +
-            self.H_drive(epsilon_a_vals, epsilon_b_vals, time_interval) +
-            self.H_conv(g_conv_vals, time_interval) +
-            self.H_sq(g_sq_vals, time_interval)
+                self.H_kerr +
+                self.H_delta(delta_a_vals, delta_b_vals, time_interval) +
+                self.H_drive(epsilon_a_vals, epsilon_b_vals, time_interval) +
+                self.H_conv(g_conv_vals, time_interval) +
+                self.H_sq(g_sq_vals, time_interval)
         )
 
         return H_batched

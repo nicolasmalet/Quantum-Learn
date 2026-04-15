@@ -1,10 +1,11 @@
 import dynamiqs as dq
 import jax.numpy as jnp
 
+from .hamiltonian import Hamiltonian
 from .history.state_history import StateHistory
 from .parameters_and_constants.jpc_config import JPCConfig
 from .parameters_and_constants.quantum_parameters import QuantumParameters
-from .hamiltonian import Hamiltonian
+
 
 class JpcChip:
     """
@@ -67,8 +68,8 @@ class JpcChip:
         tab_data = jnp.repeat(X, self.config.SIMULATION_RESOLUTION)[:-1]
 
         H = self.hamiltonian.H_tot(quantum_parameters_list=quantum_parameters_list,
-                          data=tab_data,
-                          time_interval=time_interval)
+                                   data=tab_data,
+                                   time_interval=time_interval)
 
         methode_integration = dq.method.Dopri5(max_steps=1_000_000,
                                                atol=1e-8,

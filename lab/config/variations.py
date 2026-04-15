@@ -1,8 +1,9 @@
 from zeroth.experiment import VariationConfig
 
-from quantum_learn import paths
 from lab.config import neural_networks as nn
-from lab.config.quantum_network_config import null_gradient_estimator, global_finite_difference, partial_gs_finite_difference
+from lab.config.quantum_network_config import null_gradient_estimator, global_finite_difference, \
+    partial_gs_finite_difference
+from quantum_learn import paths
 
 classical_lr = VariationConfig(
     name="Learning Rate",

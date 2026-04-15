@@ -29,5 +29,6 @@ def create_data(nb_periods: int) -> tuple[np.ndarray, np.ndarray]:
 
     return X, Y
 
+
 data_creator = DataCreatorSinusHard(nb_periods_train=300,
                                     nb_periods_test=10)

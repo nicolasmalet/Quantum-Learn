@@ -1,7 +1,7 @@
 from zeroth.experiment import ExperimentConfig
 
-from ..config import models, variations
 from .data import data_creator
+from ..config import models, variations
 
 SMOOTH_FRACTION = 0.05
 

@@ -1,11 +1,6 @@
 from dataclasses import dataclass
-from typing import Callable
 
-import dynamiqs as dq
-import jax.numpy as jnp
 from zeroth.abstract import Summary
-
-from .quantum_parameters import QuantumParameters
 
 
 @dataclass
@@ -54,6 +49,3 @@ class JPCConfig(Summary):
 
     MEASURE_RESOLUTION: int
     SIMULATION_RESOLUTION: int
-
-
-

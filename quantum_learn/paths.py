@@ -10,4 +10,3 @@ MEASURE_RESOLUTION = "quantum_network_config.simulation_params.MEASURE_RESOLUTIO
 SIMULATION_RESOLUTION = "quantum_network_config.simulation_params.SIMULATION_RESOLUTION"
 BATCH_SIZE = "batch_size"
 EPOCHS = "epochs"
-

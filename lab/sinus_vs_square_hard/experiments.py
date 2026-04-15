@@ -1,10 +1,9 @@
 from zeroth.experiment import ExperimentConfig
 
-from ..config import models, variations
 from .data import data_creator
+from ..config import models, variations
 
 SMOOTH_FRACTION = 0.05
-
 
 test_experiment: ExperimentConfig = ExperimentConfig(name="test_experiment",
                                                      base_model=models.quantum_model_config,
@@ -39,7 +38,7 @@ dudas: ExperimentConfig = ExperimentConfig(name="dudas",
                                            data_creator=data_creator)
 
 dudas_network_size: ExperimentConfig = ExperimentConfig(name="dudas_network_size",
-                                                         base_model=models.quantum_model_config_dudas,
+                                                        base_model=models.quantum_model_config_dudas,
                                                         variations=[variations.classical_network_size],
                                                         data_creator=data_creator)
 
