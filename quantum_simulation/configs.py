@@ -1,3 +1,4 @@
+from .parameters_and_constants import QuantumParametersConfig
 from .parameters_and_constants.jpc_config import JPCConfig
 
 jpc_config = JPCConfig(
@@ -31,3 +32,6 @@ jpc_config_dudas = JPCConfig(
     MEASURE_RESOLUTION=10,
     SIMULATION_RESOLUTION=10
 )
+
+quantum_parameters_config = QuantumParametersConfig(g_conv=700, g_sq=70, epsilon_a=65, epsilon_b=65, delta_a=10,
+                                                    delta_b=12)

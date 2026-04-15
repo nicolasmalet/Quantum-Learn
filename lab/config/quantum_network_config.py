@@ -2,33 +2,29 @@ from zeroth.zeroth_order import ZerothOrderAdamConfig
 from zeroth.zeroth_order.gradient_estimators import PartialFiniteDifferenceConfig, GlobalFiniteDifferenceConfig, \
     NullGradientEstimatorConfig
 
-from quantum_learn.quantum_black_box import QuantumBlackBoxConfig
-from quantum_simulation.configs import jpc_config, jpc_config_dudas
-from quantum_simulation.parameters_and_constants import QuantumParametersConfig
 from quantum_learn import build_f
-
-quantum_parameters = QuantumParametersConfig(g_conv=700, epsilon_a=65, epsilon_b=65, delta_a=10, delta_b=12)
-
-quantum_parameters_dudas = quantum_parameters
+from quantum_learn.quantum_black_box import QuantumBlackBoxConfig
+from quantum_simulation.configs import jpc_config, jpc_config_dudas, quantum_parameters_config
+from quantum_simulation.parameters_and_constants import QuantumParametersConfig
 
 quantum_network_config = QuantumBlackBoxConfig(
     name="Q_Network",
     jpc_config=jpc_config,
-    quantum_parameters=quantum_parameters,
+    quantum_parameters=quantum_parameters_config,
     build_f_config=build_f.BuildFQuadraturesConfig()
 )
 
 quantum_network_config_dudas = QuantumBlackBoxConfig(
     name="Q_Network",
     jpc_config=jpc_config_dudas,
-    quantum_parameters=quantum_parameters_dudas,
+    quantum_parameters=quantum_parameters_config,
     build_f_config=build_f.BuildFQuadraturesConfig()
 )
 
 quantum_photon_config = QuantumBlackBoxConfig(
     name="Q_Network",
     jpc_config=jpc_config_dudas,
-    quantum_parameters=quantum_parameters,
+    quantum_parameters=quantum_parameters_config,
     build_f_config=build_f.BuildFPhotonDistributionConfig()
 )
 
@@ -37,9 +33,10 @@ zeroth_order_adam = ZerothOrderAdamConfig(learning_rate=1,
                                           beta2=0.99,
                                           epsilon=1e-8)
 
-global_finite_difference: GlobalFiniteDifferenceConfig = GlobalFiniteDifferenceConfig(dA=0.01)
+global_finite_difference: GlobalFiniteDifferenceConfig = GlobalFiniteDifferenceConfig(dA=0.1)
 
-partial_gs_finite_difference: PartialFiniteDifferenceConfig = global_finite_difference #PartialFiniteDifferenceConfig(dA=0.01,
-#                                                                                             indexes=QuantumParametersConfig.get_indices("g_conv",))
+partial_gs_finite_difference: PartialFiniteDifferenceConfig = PartialFiniteDifferenceConfig(dA=0.1,
+                                                                                            indexes=QuantumParametersConfig.get_indices(
+                                                                                                "g_conv"))
 
 null_gradient_estimator: NullGradientEstimatorConfig = NullGradientEstimatorConfig()

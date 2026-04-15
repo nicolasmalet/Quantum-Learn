@@ -2,6 +2,7 @@ from dataclasses import dataclass, fields
 
 import jax.numpy as jnp
 import numpy as np
+from zeroth.abstract import Summary
 from zeroth.zeroth_order.gradient_estimators import GradientEstimator
 from zeroth.zeroth_order.zeroth_order_blackbox import ZerothOrderBlackBox
 
@@ -13,7 +14,7 @@ from .types import Array
 
 
 @dataclass
-class QuantumBlackBoxConfig:
+class QuantumBlackBoxConfig(Summary):
     name: str
     jpc_config: JPCConfig
     quantum_parameters: QuantumParametersConfig
