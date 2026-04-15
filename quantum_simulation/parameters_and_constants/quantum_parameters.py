@@ -31,26 +31,3 @@ class QuantumParameters(Summary):
         for field, value in zip(fields(self), array):
             setattr(self, field.name, getattr(self, field.name) - value)
         return self
-
-
-@dataclass(frozen=True, kw_only=True)
-class QuantumParametersConfig(Summary):
-    g_conv: float
-    g_sq: float
-    epsilon_a: float
-    epsilon_b: float
-    delta_a: float = 0
-    delta_b: float = 0
-
-    @classmethod
-    def get_indices(cls, *names: str) -> list[int]:
-        all_fields = {f.name: i for i, f in enumerate(fields(cls))}
-        return [all_fields[name] for name in names]
-
-    def instantiate(self) -> QuantumParameters:
-        return QuantumParameters(g_conv=self.g_conv,
-                                 g_sq=self.g_sq,
-                                 epsilon_a=self.epsilon_a,
-                                 epsilon_b=self.epsilon_b,
-                                 delta_a=self.delta_a,
-                                 delta_b=self.delta_b)

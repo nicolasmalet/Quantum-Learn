@@ -45,7 +45,7 @@ class PhotonDistribution:
         self.current_slider = None 
 
         # --- NOUVEAUTÉ : Extraction de probas_exp ---
-        # On calcule la taille de la sous-grille (ex: 9 neurones -> N_max = 3)
+        # On calcule la taille de la sous-grille (ex : 9 neurones -> N_max = 3)
         N_max = int(np.sqrt(nb_neurones))
         if N_max * N_max != nb_neurones:
             raise ValueError("nb_neurones doit être un carré parfait (ex: 4, 9, 16) pour inclure toutes les combinaisons croisées.")
@@ -87,7 +87,7 @@ class PhotonDistribution:
             title_prefix = "Proba Jointe"
 
         im = ax.imshow(data_to_plot[0], origin='lower', aspect='auto', 
-                       extent=[-0.5, self.DIM_B-0.5, -0.5, self.DIM_A-0.5],
+                       extent=(-0.5, self.DIM_B-0.5, -0.5, self.DIM_A-0.5),
                        cmap='viridis', vmin=vmin, vmax=vmax)
         
         fig.colorbar(im, ax=ax, label=cbar_label)
@@ -95,7 +95,7 @@ class PhotonDistribution:
         ax.set_ylabel('Photons mode A')
         title = ax.set_title(f"{title_prefix} — t = {self.time_interval[0]:.2f}")
 
-        ax_slider = plt.axes([0.2, 0.1, 0.6, 0.03])
+        ax_slider = plt.axes((0.2, 0.1, 0.6, 0.03))
         
         # On sauvegarde le slider dans 'self' pour éviter sa destruction
         self.current_slider = Slider(ax_slider, 'Temps', 0, len(self.time_interval)-1, valinit=0, valfmt='%d')
@@ -136,7 +136,7 @@ class PhotonDistribution:
         ax.set_ylabel(y_label)
         title = ax.set_title(f"{title_prefix} — t = {self.time_interval[0]:.2f}")
 
-        ax_slider = plt.axes([0.2, 0.1, 0.6, 0.03])
+        ax_slider = plt.axes((0.2, 0.1, 0.6, 0.03))
         
         # On sauvegarde le slider dans 'self' pour éviter sa destruction
         self.current_slider = Slider(ax_slider, 'Temps', 0, len(self.time_interval)-1, valinit=0, valfmt='%d')

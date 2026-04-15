@@ -1,11 +1,10 @@
 import dynamiqs as dq
 import jax.numpy as jnp
-import numpy as np
 
 from .history.state_history import StateHistory
 from .parameters_and_constants.jpc_config import JPCConfig
 from .parameters_and_constants.quantum_parameters import QuantumParameters
-from quantum_learn.types import Array
+
 
 class JpcChip:
     """
@@ -39,7 +38,7 @@ class JpcChip:
     def __init__(self, jpc_config: JPCConfig):
         self.config: JPCConfig = jpc_config
 
-    def run_simulation(self, X: Array, quantum_parameters_list: list[QuantumParameters], encoding_observable) -> list[StateHistory]:
+    def run_simulation(self, X: jnp.ndarray, quantum_parameters_list: list[QuantumParameters]) -> list[StateHistory]:
         """
         Entraîne la puce sur toutes les données
         -> résout l'équation de Lindblad drive après drive pour plusieurs valeurs possibles du couple
@@ -66,25 +65,24 @@ class JpcChip:
         psi = self.config.vacuum_state
         tab_data = jnp.repeat(X, self.config.SIMULATION_RESOLUTION)[:-1]
 
-        def f_encode(X, data):
-            return data * X + 0.1 * X
+        # H_encode = dq.pwc(time_interval, tab_data, self.config.H_encode)
 
-
-        #H_encode = dq.pwc(time_interval, tab_data, self.config.H_encode)
-
-        H = self.config.H(quantum_parameters_list, tab_data, time_interval, f_encoding=f_encode, encoding_observable=encoding_observable)
-        #(self, quantum_parameters, data: jnp.array, time_interval: jnp.array, f_encoding,
+        H = self.config.H(quantum_parameters=quantum_parameters_list,
+                          data=tab_data,
+                          time_interval=time_interval)
+        # (self, quantum_parameters, data: jnp.array, time_interval: jnp.array, f_encoding,
         #  encoding_type='amplitude', encoding_observable='epsilon')
 
         methode_integration = dq.method.Dopri5(max_steps=1_000_000,
-            atol=1e-8, 
-            rtol=1e-8)
+                                               atol=1e-8,
+                                               rtol=1e-8)
 
         result = dq.mesolve(H, self.config.jump_ops, psi, time_interval,
                             exp_ops=self.config.exp_ops,
                             method=methode_integration,
-                            options=dq.Options(cartesian_batching=False, progress_meter=True, 
+                            options=dq.Options(cartesian_batching=False, progress_meter=True,
                                                save_states=False))
 
-        return [StateHistory(self.config, result.expects[i],
-                             time_interval) for i in range(nb_simulations)]
+        return [StateHistory(jpc_config=self.config,
+                             expects=result.expects[i],
+                             time_interval=time_interval) for i in range(nb_simulations)]

@@ -1,23 +1,19 @@
-import dynamiqs as dq
+import equinox as eqx
 import jax.numpy as jnp
-import matplotlib.pyplot as plt
-
-from quantum_simulation import jpc_chip
-from quantum_simulation.history import quadratures
-from quantum_simulation.parameters_and_constants import QuantumParameters
-
 
 from quantum_learn.types import Array
 from quantum_simulation.history import StateHistory
+from quantum_simulation.jpc_chip import JpcChip
 from quantum_simulation.parameters_and_constants import JPCConfig
+from quantum_simulation.parameters_and_constants import QuantumParameters
 
-import equinox as eqx
 
 @eqx.filter_jit
 def _jit_compute_weights(F_stack, label_reshape):
     """Calcule toutes les pseudo-inverses et les poids d'un coup (Batching)."""
     F_inv = jnp.linalg.pinv(F_stack)
     return F_inv @ label_reshape
+
 
 @eqx.filter_jit
 def _jit_compute_predictions(F_stack, W_stack):
@@ -26,60 +22,53 @@ def _jit_compute_predictions(F_stack, W_stack):
 
 
 class Reservoir:
-    '''
-    Docstring to do.
-    '''
-
-    def __init__(self, W:jnp.array, chip:jpc_chip, mode='quadratures'):
-        self.W = W
-        self.chip = chip
+    def __init__(self, W, chip: JpcChip, mode: str = 'quadratures') -> None:
+        self.W: jnp.ndarray = W
+        self.chip: JpcChip = chip
         self.F = []
-        self.mode = mode # si quadratures ou probas
+        self.mode: str = mode  # si quadratures ou probas
 
-    def push(self, data:jnp.array, quantum_parameters_list: list[QuantumParameters], 
-             simulation_constants: JPCConfig, encoding_observable):
-        '''
-        Docstring to do.
-        '''
-        List_state_history = self.chip.run_simulation(data, quantum_parameters_list, encoding_observable=encoding_observable)
+    def push(self, data: jnp.ndarray, quantum_parameters_list: list[QuantumParameters]):
+        List_state_history = self.chip.run_simulation(data, quantum_parameters_list)
         match self.mode:
             case 'quadratures':
-                F = [ build_f_quadratures(List_state_history[i], simulation_constants) for i in range(len(List_state_history)) ]
+                F = [build_f_quadratures(List_state_history[i], self.chip.config) for i in
+                     range(len(List_state_history))]
             case 'probas':
-                F = [ build_f_probas(List_state_history[i], simulation_constants) for i in range(len(List_state_history)) ]
+                F = [build_f_probas(List_state_history[i], self.chip.config) for i in
+                     range(len(List_state_history))]
+
         self.F = F
         return self.F
 
-    
-    def train(self, data: jnp.array, label: jnp.array, 
-              quantum_parameters_list: list[QuantumParameters], simulation_constants: JPCConfig, encoding_observable):
-        
-        label_reshape = jnp.reshape(jnp.array(label), (len(label), 1))
-        self.push(data, quantum_parameters_list, simulation_constants, encoding_observable)
-        
+    def train(self, X: jnp.ndarray, Y: jnp.ndarray,
+              quantum_parameters_list: list[QuantumParameters]):
+
+        label_reshape = jnp.reshape(jnp.array(Y), (len(Y), 1))
+        self.push(X, quantum_parameters_list)
+
         # Empilement
-        F_stack = jnp.stack(self.F) 
-        
+        F_stack = jnp.stack(self.F)
+
         # Appel de la fonction compilée !
         W_stack = _jit_compute_weights(F_stack, label_reshape)
-        
+
         self.W = list(W_stack)
         return self.W
-    
-    def test(self, data: jnp.array, label_data: jnp.array, 
-              quantum_parameters_list: list[QuantumParameters], simulation_constants: JPCConfig, encoding_observable):
-        
-        self.push(data, quantum_parameters_list, simulation_constants, encoding_observable)
-        
+
+    def test(self, X: jnp.ndarray, Y: jnp.ndarray,
+             quantum_parameters_list: list[QuantumParameters]):
+
+        self.push(X, quantum_parameters_list)
+
         # Empilement
         F_stack = jnp.stack(self.F)
         W_stack = jnp.stack(self.W)
 
         # Appel de la fonction compilée !
         Y_batch = _jit_compute_predictions(F_stack, W_stack)
-        
-        return list(Y_batch)
 
+        return list(Y_batch)
 
     '''
     def train(self, data:jnp.array, label:jnp.array, 
@@ -119,7 +108,6 @@ class Reservoir:
     '''
 
 
-
 @eqx.filter_jit
 def _jit_format_quadratures(L_Ia, L_Qa, L_Ib, L_Qb, input_dim, nb_quadratures):
     """Fonction pure compilée par JAX pour redimensionner et empiler les tableaux."""
@@ -128,6 +116,7 @@ def _jit_format_quadratures(L_Ia, L_Qa, L_Ib, L_Qb, input_dim, nb_quadratures):
     L_Ib = L_Ib.reshape(-1, input_dim // nb_quadratures)
     L_Qb = L_Qb.reshape(-1, input_dim // nb_quadratures)
     return jnp.hstack((L_Ia, L_Qa, L_Ib, L_Qb))
+
 
 # 2. TA FONCTION CLASSIQUE (Qui extrait les données et appelle la fonction JIT)
 def build_f_quadratures(state_history: StateHistory, simulation_constants: JPCConfig) -> Array:
@@ -143,21 +132,23 @@ def build_f_quadratures(state_history: StateHistory, simulation_constants: JPCCo
 
     # Calcul (Le GPU prend le relais grâce au JIT)
     F = _jit_format_quadratures(L_Ia, L_Qa, L_Ib, L_Qb, input_dim, nb_quadratures)
-    return F      
+    return F
+
 
 @eqx.filter_jit
-def _jit_format_probas(probas_exp: jnp.array, step: int, measure_resolution: int, nb_neurones: int):
+def _jit_format_probas(probas_exp: jnp.ndarray, step: int, measure_resolution: int, nb_neurones: int):
     """
     Fonction pure JAX : Sous-échantillonne et redimensionne la matrice pour le multiplexage temporel.
     """
     # 1. Sous-échantillonnage temporel
     # probas_exp passe de (Temps_total_simu, nb_neurones) à (n * measure_resolution, nb_neurones)
     P_downsampled = probas_exp[::step, :]
-    
+
     # 2. Multiplexage temporel (Chunking)
     # On regroupe les instants de mesure d'une même période sur une seule ligne.
     # On passe à (n, measure_resolution * nb_neurones)
     return P_downsampled.reshape(-1, measure_resolution * nb_neurones)
+
 
 def build_f_probas(state_history, simulation_constants):
     """
@@ -167,18 +158,18 @@ def build_f_probas(state_history, simulation_constants):
     """
     # 1. Calcul du pas d'échantillonnage
     step = simulation_constants.SIMULATION_RESOLUTION // simulation_constants.MEASURE_RESOLUTION
-    
+
     # 2. Récupération des probabilités (Temps_total_simu, nb_neurones)
     probas_exp = state_history.photon_distribution.probas_exp
-    
+
     # 3. On extrait le nombre de neurones dynamiquement (le nombre de colonnes)
     nb_neurones = probas_exp.shape[1]
-    
+
     # 4. Application via le GPU
     F = _jit_format_probas(probas_exp, step, simulation_constants.MEASURE_RESOLUTION, nb_neurones)
-    
+
     return F
-        
+
 
 '''
 def build_f_quadratures(state_history: StateHistory, simulation_constants: JPCConfig) -> Array:
