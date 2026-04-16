@@ -1,13 +1,15 @@
 import dynamiqs as dq
 import jax.numpy as jnp
+import numpy as np
 
+from .encoding_functions import EncodingFunction, Linear
 from .hamiltonian import Hamiltonian
 from .history.state_history import StateHistory
 from .parameters_and_constants.jpc_config import JPCConfig
 from .parameters_and_constants.quantum_parameters import QuantumParameters
 
 
-class JpcChip:
+class JPCChip:
     """
     Josephson Parametric Converter (JPC) made of two resonators chip whom contains
     one mode each, for neuromorphic quantum computing simulations.
@@ -36,11 +38,12 @@ class JpcChip:
     Cohen-Tannoudji, Quantum Mechanics Vol. 2.
     """  # résolution des simulations Dynamiqs
 
-    def __init__(self, jpc_config: JPCConfig):
+    def __init__(self, jpc_config: JPCConfig, encoding_parameters: tuple = ("gsq",),
+                 encoding_function: EncodingFunction = Linear) -> None:
         self.config: JPCConfig = jpc_config
-        self.hamiltonian = Hamiltonian(jpc_config)
+        self.hamiltonian = Hamiltonian(jpc_config, encoding_parameters, encoding_function)
 
-    def run_simulation(self, X: jnp.ndarray, quantum_parameters_list: list[QuantumParameters]) -> list[StateHistory]:
+    def run_simulation(self, X: np.ndarray, quantum_parameters_list: list[QuantumParameters]) -> list[StateHistory]:
         """
         Entraîne la puce sur toutes les données
         -> résout l'équation de Lindblad drive après drive pour plusieurs valeurs possibles du couple
@@ -53,13 +56,10 @@ class JpcChip:
         quantum_parameters_list : list[QuantumParameters]
         Returns
         -------
-        F1 : np.array of shape 64 x len(X)
-            Feature matrix for the simulation 1
-        F2 : np.array of shape 64 x len(X)
-            Feature matrix for the simulation 2
-        F3 : np.array of shape 64 x len(X)
-            Feature matrix for the simulation 3
+        list[StateHistory]
         """
+
+        X = jnp.asarray(X)
 
         nb_simulations = len(quantum_parameters_list)
         time_interval = jnp.linspace(0, self.config.DRIVE_DURATION * X.size,
@@ -71,13 +71,8 @@ class JpcChip:
                                    data=tab_data,
                                    time_interval=time_interval)
 
-        methode_integration = dq.method.Dopri5(max_steps=1_000_000,
-                                               atol=1e-8,
-                                               rtol=1e-8)
-
         result = dq.mesolve(H, self.hamiltonian.jump_ops, psi, time_interval,
                             exp_ops=self.hamiltonian.exp_ops,
-                            method=methode_integration,
                             options=dq.Options(cartesian_batching=False, progress_meter=True,
                                                save_states=False))
 

@@ -26,9 +26,9 @@ class PhotonDistribution:
 
         # --- CORRECTION 1 : Conversion en Numpy ---
         # Indispensable pour que Matplotlib puisse animer sans geler
-        self.joint_proba = np.array(joint_proba_jax)
-        self.P_a = np.array(P_a_jax)
-        self.P_b = np.array(P_b_jax)
+        self.joint_proba = np.asarray(joint_proba_jax)
+        self.P_a = np.asarray(P_a_jax)
+        self.P_b = np.asarray(P_b_jax)
 
         # --- CORRECTION 2 : Protection mémoire du slider ---
         self.current_slider = None

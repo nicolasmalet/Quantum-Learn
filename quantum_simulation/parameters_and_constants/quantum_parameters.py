@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, fields
-from typing import Callable
 
-import jax.numpy as jnp
 import numpy as np
 from zeroth.abstract import Summary
 
@@ -16,18 +14,6 @@ class QuantumParameters(Summary):
     epsilon_b: float
     delta_a: float
     delta_b: float
-
-    encoding: tuple[str] = ("g_sq",)
-
-    f_encoding: Callable[[float, jnp.ndarray], jnp.ndarray] = staticmethod(lambda X, data: data * X)
-
-    def get_value(self, name: str, data: jnp.ndarray) -> jnp.ndarray:
-        base_value = getattr(self, name)
-
-        if name in self.encoding:
-            return self.f_encoding(base_value, data)
-
-        return base_value * jnp.ones_like(data)
 
     def as_array(self):
         return np.array([getattr(self, f.name) for f in fields(self)])

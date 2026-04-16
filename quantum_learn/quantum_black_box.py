@@ -1,12 +1,11 @@
 from dataclasses import dataclass, fields
 
-import jax.numpy as jnp
 import numpy as np
 from zeroth.abstract import Summary
 from zeroth.zeroth_order.gradient_estimators import GradientEstimator
 from zeroth.zeroth_order.zeroth_order_blackbox import ZerothOrderBlackBox
 
-from quantum_simulation.jpc_chip import JpcChip
+from quantum_simulation.jpc_chip import JPCChip
 from quantum_simulation.parameters_and_constants import JPCConfig, QuantumParameters
 from .build_f import BuildF, BuildFConfig
 from .types import Array
@@ -31,7 +30,7 @@ class QuantumBlackBox(ZerothOrderBlackBox):
 
         self.jpc_config = config.jpc_config
 
-        self.simulator: JpcChip = JpcChip(config.jpc_config)
+        self.simulator: JPCChip = JPCChip(config.jpc_config)
 
         self.build_f: BuildF = config.build_f_config.instantiate(config.jpc_config)
         self.output_dim = self.build_f.output_dim
@@ -54,10 +53,10 @@ class QuantumBlackBox(ZerothOrderBlackBox):
         Returns:
             Array: Output. Shape: (output_dim, batch_size).
         """
-        state_history = self.simulator.run_simulation(jnp.array(X), [self.params])[0]
+        state_history = self.simulator.run_simulation(X, [self.params])[0]
 
         F = self.build_f(state_history)
-        return np.asarray(F)
+        return F
 
     def forward_perturbed(self, X: Array, gradient_estimator: GradientEstimator) -> Array:
         """Parallel forward pass for multiple perturbed versions of the network.
@@ -70,7 +69,7 @@ class QuantumBlackBox(ZerothOrderBlackBox):
             gradient_estimator (GradientEstimator): The gradient_estimator object.
         """
         perturbed_params = [QuantumParameters(*params) for params in gradient_estimator.perturb(self.params.as_array())]
-        state_history_list = self.simulator.run_simulation(jnp.array(X), perturbed_params)
+        state_history_list = self.simulator.run_simulation(X, perturbed_params)
         F_pred_list = [self.build_f(state_history) for state_history in state_history_list]
         perturbed_F_pred = np.stack(F_pred_list, axis=0)
 

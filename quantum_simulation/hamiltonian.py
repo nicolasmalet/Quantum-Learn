@@ -5,45 +5,50 @@ from dynamiqs.time_qarray import PWCTimeQArray
 from quantum_simulation.parameters_and_constants.jpc_config import JPCConfig
 from quantum_simulation.parameters_and_constants.quantum_parameters import QuantumParameters
 
+from .encoding_functions import EncodingFunction
 
 class Hamiltonian:
-    def __init__(self, jpc_config: JPCConfig):
+    def __init__(self, jpc_config: JPCConfig, encoding_parameters: tuple,
+                 encoding_function: EncodingFunction) -> None:
+
         self.jpc_config: JPCConfig = jpc_config
+        self.encoding_parameters: tuple = encoding_parameters
+        self.encoding_function: EncodingFunction = encoding_function
 
-        self.a = dq.destroy(self.jpc_config.DIM_A)
-        self.a_dag = self.a.dag()
-        self.N_a = self.a_dag @ self.a
-        self.b = dq.destroy(self.jpc_config.DIM_B)
-        self.b_dag = self.b.dag()
-        self.N_b = self.b_dag @ self.b
-        self.Ha = dq.tensor(self.N_a, dq.eye(self.jpc_config.DIM_B))
-        self.Hb = dq.tensor(dq.eye(self.jpc_config.DIM_A), self.N_b)
+        self.a: dq.QArray = dq.destroy(self.jpc_config.DIM_A)
+        self.a_dag: dq.QArray = self.a.dag()
+        self.N_a: dq.QArray = self.a_dag @ self.a
+        self.b: dq.QArray = dq.destroy(self.jpc_config.DIM_B)
+        self.b_dag: dq.QArray = self.b.dag()
+        self.N_b: dq.QArray = self.b_dag @ self.b
+        self.Ha: dq.QArray = dq.tensor(self.N_a, dq.eye(self.jpc_config.DIM_B))
+        self.Hb: dq.QArray = dq.tensor(dq.eye(self.jpc_config.DIM_A), self.N_b)
 
-        self.H_kerr_a = self.jpc_config.K_AA * self.N_a @ self.N_a
-        self.H_kerr_b = self.jpc_config.K_BB * self.N_b @ self.N_b
-        self.H_cross = - self.jpc_config.K_AB * dq.tensor(self.N_a, self.N_b)
-        self.H_kerr = dq.tensor(self.H_kerr_a, dq.eye(self.jpc_config.DIM_B)) + dq.tensor(dq.eye(self.jpc_config.DIM_A),
+        self.H_kerr_a: dq.QArray = self.jpc_config.K_AA * self.N_a @ self.N_a
+        self.H_kerr_b: dq.QArray = self.jpc_config.K_BB * self.N_b @ self.N_b
+        self.H_cross: dq.QArray= - self.jpc_config.K_AB * dq.tensor(self.N_a, self.N_b)
+        self.H_kerr: dq.QArray = dq.tensor(self.H_kerr_a, dq.eye(self.jpc_config.DIM_B)) + dq.tensor(dq.eye(self.jpc_config.DIM_A),
                                                                                           self.H_kerr_b) + self.H_cross
 
-        self.H_da = dq.tensor(
+        self.H_da: dq.QArray = dq.tensor(
             jnp.sqrt(self.jpc_config.KAPPA_A) * (self.a + self.a_dag),
             dq.eye(self.jpc_config.DIM_B))
-        self.H_db = dq.tensor(dq.eye(self.jpc_config.DIM_A), jnp.sqrt(self.jpc_config.KAPPA_B) * (
+        self.H_db: dq.QArray = dq.tensor(dq.eye(self.jpc_config.DIM_A), jnp.sqrt(self.jpc_config.KAPPA_B) * (
                 self.b + self.b_dag))
 
-        self.vacuum_state = dq.tensor(dq.basis(self.jpc_config.DIM_A, 0),
+        self.vacuum_state: dq.QArray = dq.tensor(dq.basis(self.jpc_config.DIM_A, 0),
                                       dq.basis(self.jpc_config.DIM_B, 0))  # états initiaux === vaccum states
-        self.jump_ops = [jnp.sqrt(self.jpc_config.KAPPA_A) * dq.tensor(self.a, dq.eye(self.jpc_config.DIM_B)),
+        self.jump_ops: list[dq.QArray] = [jnp.sqrt(self.jpc_config.KAPPA_A) * dq.tensor(self.a, dq.eye(self.jpc_config.DIM_B)),
                          jnp.sqrt(self.jpc_config.KAPPA_B) * dq.tensor(dq.eye(self.jpc_config.DIM_A),
                                                                        self.b)]  # Opérateurs de dissipation
-        self.basic_exp_ops = [dq.tensor(self.a, dq.eye(self.jpc_config.DIM_B)),
+        self.basic_exp_ops: list[dq.QArray] = [dq.tensor(self.a, dq.eye(self.jpc_config.DIM_B)),
                               dq.tensor(dq.eye(self.jpc_config.DIM_A), self.b),
                               dq.tensor(self.N_a, dq.eye(self.jpc_config.DIM_B)),
                               dq.tensor(dq.eye(self.jpc_config.DIM_A), self.N_b)]  # Valeurs moyennes à calculer
 
-        self.fock_ops = self.get_all_fock_projectors()
+        self.fock_ops: list[dq.QArray] = self.get_all_fock_projectors()
 
-        self.exp_ops = self.basic_exp_ops + self.fock_ops
+        self.exp_ops: list[dq.QArray] = self.basic_exp_ops + self.fock_ops
 
     def get_all_fock_projectors(self) -> list[dq.QArray]:
         """Génère la liste complète des projecteurs |n_a, n_b><n_a, n_b|."""
@@ -55,6 +60,14 @@ class Hamiltonian:
                 # On ajoute le projecteur |i, j><i, j|
                 ops.append(ket @ ket.dag())
         return ops
+
+    def get_value(self, quantum_parameters: QuantumParameters, name: str, data: jnp.ndarray) -> jnp.ndarray:
+        base_value: float = getattr(quantum_parameters, name)
+
+        if name in self.encoding_parameters:
+            return self.encoding_function(base_value, data)
+
+        return base_value * jnp.ones_like(data)
 
     def H_delta(self, delta_a: jnp.ndarray, delta_b: jnp.ndarray, time_interval: jnp.ndarray) -> PWCTimeQArray:
         return (dq.pwc(time_interval, delta_a,
@@ -93,12 +106,12 @@ class Hamiltonian:
         """
         Assemble un Hamiltonien batché pour N simulations en parallèle.
         """
-        delta_a_vals = jnp.stack([p.get_value("delta_a", data) for p in quantum_parameters_list])
-        delta_b_vals = jnp.stack([p.get_value("delta_b", data) for p in quantum_parameters_list])
-        epsilon_a_vals = jnp.stack([p.get_value("epsilon_a", data) for p in quantum_parameters_list])
-        epsilon_b_vals = jnp.stack([p.get_value("epsilon_b", data) for p in quantum_parameters_list])
-        g_conv_vals = jnp.stack([p.get_value("g_conv", data) for p in quantum_parameters_list])
-        g_sq_vals = jnp.stack([p.get_value("g_sq", data) for p in quantum_parameters_list])
+        delta_a_vals = jnp.stack([self.get_value(p, "delta_a", data) for p in quantum_parameters_list])
+        delta_b_vals = jnp.stack([self.get_value(p, "delta_b", data) for p in quantum_parameters_list])
+        epsilon_a_vals = jnp.stack([self.get_value(p, "epsilon_a", data) for p in quantum_parameters_list])
+        epsilon_b_vals = jnp.stack([self.get_value(p, "epsilon_b", data) for p in quantum_parameters_list])
+        g_conv_vals = jnp.stack([self.get_value(p, "g_conv", data) for p in quantum_parameters_list])
+        g_sq_vals = jnp.stack([self.get_value(p, "g_sq", data) for p in quantum_parameters_list])
 
         H_batched = (
                 self.H_kerr +
