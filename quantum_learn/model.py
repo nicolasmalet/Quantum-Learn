@@ -1,12 +1,13 @@
 from dataclasses import dataclass
 
 import numpy as np
+from typing import override
 from zeroth import abstract, first_order
 from zeroth import zeroth_order
 from zeroth.data import Data
 
 from quantum_learn.quantum_black_box import QuantumBlackBox, QuantumBlackBoxConfig
-
+from .types import Array
 
 @dataclass(frozen=True)
 class QuantumModelConfig(abstract.ModelConfig):
@@ -45,6 +46,7 @@ class QuantumModel(abstract.Model):
             output_dim=self.data.output_dim)
         self.neural_network_optimizer: first_order.FirstOrderOptimizer = config.neural_network_optimizer_config.instantiate()
 
+    @override
     def train(self, nb_print: int = 0) -> None:
         """Runs the training loop over the dataset.
 
@@ -64,29 +66,35 @@ class QuantumModel(abstract.Model):
 
         print(f"    Training {self.id} Model")
         for batch_idx, (X_train, Y_train) in enumerate(self.data):
-            X_train = X_train.ravel()
 
-            perturbed_F_pred = self.quantum_blackbox.forward_perturbed(X_train, self.quantum_gradient_estimator)
-            perturbed_Y_pred = self.neural_network(perturbed_F_pred)
-
-            avg_loss, perturbed_Loss = self.loss.compute_losses_for_zeroth_order(perturbed_Y_pred, Y_train)
-
-            gradient = self.quantum_gradient_estimator.get_gradient(perturbed_Loss)
-
-            F = perturbed_F_pred[0]
-
-            for _ in range(100):
-                self.neural_network_optimizer.do_descent(self.neural_network, self.loss, F, Y_train)
-
-            self.quantum_optimizer.update_params(self.quantum_blackbox, gradient)
-
-            self.training_loss[batch_idx] = avg_loss
+            loss = self._training_step(X_train, Y_train)
+            self.training_loss[batch_idx] = loss
 
             if batch_idx in print_indexes:
                 print(f"            batch n°{batch_idx + 1} out of {nb_batches}, "
-                      f"loss : {self.training_loss[batch_idx]}",
+                      f"loss : {loss}",
                       f"q_params : {self.quantum_blackbox.params}")
 
+    def _training_step(self, X_train: Array, Y_train: Array) -> float:
+        X_train = X_train.ravel()
+
+        perturbed_F_pred = self.quantum_blackbox.forward_perturbed(X_train, self.quantum_gradient_estimator)
+        perturbed_Y_pred = self.neural_network(perturbed_F_pred)
+
+        avg_loss, perturbed_Loss = self.loss.compute_losses_for_zeroth_order(perturbed_Y_pred, Y_train)
+
+        gradient = self.quantum_gradient_estimator.get_gradient(perturbed_Loss)
+
+        F = perturbed_F_pred[0]
+
+        for _ in range(100):
+            self.neural_network_optimizer.do_descent(self.neural_network, self.loss, F, Y_train)
+
+        self.quantum_optimizer.update_params(self.quantum_blackbox, gradient)
+
+        return avg_loss
+
+    @override
     def test(self) -> None:
         X_test, Y_true = self.data.X_test, self.data.Y_test
         F_pred = self.quantum_blackbox(X_test)

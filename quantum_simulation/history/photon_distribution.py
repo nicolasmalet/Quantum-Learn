@@ -15,7 +15,7 @@ class PhotonDistribution:
 
         # 1. Calculs rapides sur GPU avec JAX
         probs_reelles = jnp.real(jnp.array(expects[4:]))
-        all_fock_probs = jnp.clip(probs_reelles, a_min=0.0, a_max=1.0)
+        all_fock_probs = jnp.clip(probs_reelles, 0.0, 1.0)
 
         joint_proba_jax = all_fock_probs.T.reshape(
             len(time_interval), self.DIM_A, self.DIM_B

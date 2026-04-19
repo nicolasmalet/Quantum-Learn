@@ -1,0 +1,4 @@
+Encoding(
+    encoding_parameters=('g_sq',),
+    encoding_function=Linear()
+)

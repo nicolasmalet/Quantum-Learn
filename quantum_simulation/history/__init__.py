@@ -1,1 +1,1 @@
-from .state_history import StateHistory, Quadratures, PhotonDistribution
+from .simulation_result import SimulationResult, Quadratures, PhotonDistribution

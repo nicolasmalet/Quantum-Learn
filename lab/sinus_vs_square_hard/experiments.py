@@ -33,12 +33,12 @@ photon: ExperimentConfig = ExperimentConfig(name="photon",
                                             data_creator=data_creator)
 
 dudas: ExperimentConfig = ExperimentConfig(name="dudas",
-                                           base_model=models.quantum_model_config_dudas,
+                                           base_model=models.dudas,
                                            variations=[],
                                            data_creator=data_creator)
 
 dudas_network_size: ExperimentConfig = ExperimentConfig(name="dudas_network_size",
-                                                        base_model=models.quantum_model_config_dudas,
+                                                        base_model=models.dudas,
                                                         variations=[variations.classical_network_size],
                                                         data_creator=data_creator)
 

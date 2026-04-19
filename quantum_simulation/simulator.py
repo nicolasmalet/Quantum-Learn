@@ -2,14 +2,12 @@ import dynamiqs as dq
 import jax.numpy as jnp
 import numpy as np
 
-from .encoding_functions import EncodingFunction, Linear
 from .hamiltonian import Hamiltonian
-from .history.state_history import StateHistory
-from .parameters_and_constants.jpc_config import JPCConfig
-from .parameters_and_constants.quantum_parameters import QuantumParameters
+from .history.simulation_result import SimulationResult
+from .parameters_and_constants import JPCConfig, QuantumParameters, Encoding
 
 
-class JPCChip:
+class Simulator:
     """
     Josephson Parametric Converter (JPC) made of two resonators chip whom contains
     one mode each, for neuromorphic quantum computing simulations.
@@ -38,12 +36,15 @@ class JPCChip:
     Cohen-Tannoudji, Quantum Mechanics Vol. 2.
     """  # résolution des simulations Dynamiqs
 
-    def __init__(self, jpc_config: JPCConfig, encoding_parameters: tuple = ("gsq",),
-                 encoding_function: EncodingFunction = Linear) -> None:
+    def __init__(self, jpc_config: JPCConfig, encoding: Encoding) -> None:
         self.config: JPCConfig = jpc_config
-        self.hamiltonian = Hamiltonian(jpc_config, encoding_parameters, encoding_function)
+        self.encoding: Encoding = encoding
+        self.hamiltonian = Hamiltonian(jpc_config, encoding)
 
-    def run_simulation(self, X: np.ndarray, quantum_parameters_list: list[QuantumParameters]) -> list[StateHistory]:
+    def __call__(self, X: np.ndarray, quantum_parameters_list: list[QuantumParameters]) -> list[SimulationResult]:
+        return self.run_simulation(X, quantum_parameters_list)
+
+    def run_simulation(self, X: np.ndarray, quantum_parameters_list: list[QuantumParameters]) -> list[SimulationResult]:
         """
         Entraîne la puce sur toutes les données
         -> résout l'équation de Lindblad drive après drive pour plusieurs valeurs possibles du couple
@@ -56,9 +57,8 @@ class JPCChip:
         quantum_parameters_list : list[QuantumParameters]
         Returns
         -------
-        list[StateHistory]
+        list[SimulationResult]
         """
-
         X = jnp.asarray(X)
 
         nb_simulations = len(quantum_parameters_list)
@@ -71,11 +71,18 @@ class JPCChip:
                                    data=tab_data,
                                    time_interval=time_interval)
 
-        result = dq.mesolve(H, self.hamiltonian.jump_ops, psi, time_interval,
+        solver_config = dq.method.Dopri5(max_steps=10**9)
+
+        result = dq.mesolve(H=H,
+                            jump_ops=self.hamiltonian.jump_ops,
+                            rho0=psi,
+                            tsave=time_interval,
                             exp_ops=self.hamiltonian.exp_ops,
-                            options=dq.Options(cartesian_batching=False, progress_meter=True,
+                            method=solver_config,
+                            options=dq.Options(cartesian_batching=False,
+                                               progress_meter=True,
                                                save_states=False))
 
-        return [StateHistory(jpc_config=self.config,
-                             expects=result.expects[i],
-                             time_interval=time_interval) for i in range(nb_simulations)]
+        return [SimulationResult(jpc_config=self.config,
+                                 expects=result.expects[i],
+                                 time_interval=time_interval) for i in range(nb_simulations)]

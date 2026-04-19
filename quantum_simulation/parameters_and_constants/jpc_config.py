@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from zeroth.abstract import Summary
 
 
-@dataclass
+@dataclass(frozen=True)
 class JPCConfig(Summary):
     """
     Parameters

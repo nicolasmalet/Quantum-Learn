@@ -1,7 +1,7 @@
-from .parameters_and_constants import QuantumParameters
-from .parameters_and_constants.jpc_config import JPCConfig
+from .encoding_functions import Linear
+from .parameters_and_constants import JPCConfig, QuantumParameters, Encoding
 
-jpc_config = JPCConfig(
+jpc_config: JPCConfig = JPCConfig(
     DIM_A=15,
     DIM_B=15,
     OMEGA_A=1e4,
@@ -16,7 +16,7 @@ jpc_config = JPCConfig(
     SIMULATION_RESOLUTION=10
 )
 
-jpc_config_dudas = JPCConfig(
+jpc_config_dudas: JPCConfig = JPCConfig(
     DIM_A=10,
     DIM_B=10,
     OMEGA_A=1e4,
@@ -28,12 +28,19 @@ jpc_config_dudas = JPCConfig(
     K_AB=0.05,
     DRIVE_DURATION=0.04,
     MEASURE_RESOLUTION=10,
-    SIMULATION_RESOLUTION=100
+    SIMULATION_RESOLUTION=10
 )
 
-quantum_parameters = QuantumParameters(g_conv=900,
-                                       g_sq=180,
-                                       epsilon_a=170,
-                                       epsilon_b=170,
-                                       delta_a=0,
-                                       delta_b=0)
+quantum_parameters_dudas: QuantumParameters = QuantumParameters(
+    g_conv=900,
+    g_sq=180,
+    epsilon_a=170,
+    epsilon_b=170,
+    delta_a=0,
+    delta_b=0
+)
+
+base_encoding: Encoding = Encoding(
+    encoding_parameters=("g_sq",),
+    encoding_function=Linear()
+)

@@ -6,7 +6,7 @@ from .quadratures import Quadratures
 from ..parameters_and_constants import JPCConfig
 
 
-class StateHistory:
+class SimulationResult:
     """
     Docstring to do.
     """

@@ -4,28 +4,31 @@ from zeroth.zeroth_order.gradient_estimators import PartialFiniteDifferenceConfi
 
 from quantum_learn import build_f
 from quantum_learn.quantum_black_box import QuantumBlackBoxConfig
-from quantum_simulation.configs import jpc_config, jpc_config_dudas, quantum_parameters
+from quantum_simulation.configs import jpc_config_dudas, quantum_parameters_dudas, base_encoding
 from quantum_simulation.parameters_and_constants import QuantumParameters
 
-quantum_network_config = QuantumBlackBoxConfig(
+network_quad = QuantumBlackBoxConfig(
     name="Q_Network",
-    jpc_config=jpc_config,
-    quantum_parameters=quantum_parameters,
+    jpc_config=jpc_config_dudas,
+    encoding=base_encoding,
+    quantum_parameters=quantum_parameters_dudas,
     build_f_config=build_f.BuildFQuadraturesConfig()
 )
 
-quantum_network_config_dudas = QuantumBlackBoxConfig(
+network_quad_poly = QuantumBlackBoxConfig(
     name="Q_Network",
     jpc_config=jpc_config_dudas,
-    quantum_parameters=quantum_parameters,
-    build_f_config=build_f.BuildFQuadraturesConfig()
+    encoding=base_encoding,
+    quantum_parameters=quantum_parameters_dudas,
+    build_f_config=build_f.BuildFQuadraturesPolynomialsConfig()
 )
 
-quantum_photon_config = QuantumBlackBoxConfig(
+network_photon = QuantumBlackBoxConfig(
     name="Q_Network",
     jpc_config=jpc_config_dudas,
-    quantum_parameters=quantum_parameters,
-    build_f_config=build_f.BuildFPhotonDistributionConfig()
+    encoding=base_encoding,
+    quantum_parameters=quantum_parameters_dudas,
+    build_f_config=build_f.BuildFPhotonDistributionConfig(clip_probas=2)
 )
 
 zeroth_order_adam = ZerothOrderAdamConfig(learning_rate=1,

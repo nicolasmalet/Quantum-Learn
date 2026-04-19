@@ -2,18 +2,15 @@ import dynamiqs as dq
 import jax.numpy as jnp
 from dynamiqs.time_qarray import PWCTimeQArray
 
-from quantum_simulation.parameters_and_constants.jpc_config import JPCConfig
-from quantum_simulation.parameters_and_constants.quantum_parameters import QuantumParameters
+from quantum_simulation.parameters_and_constants import JPCConfig, QuantumParameters, Encoding
 
 from .encoding_functions import EncodingFunction
 
 class Hamiltonian:
-    def __init__(self, jpc_config: JPCConfig, encoding_parameters: tuple,
-                 encoding_function: EncodingFunction) -> None:
+    def __init__(self, jpc_config: JPCConfig, encoding: Encoding) -> None:
 
         self.jpc_config: JPCConfig = jpc_config
-        self.encoding_parameters: tuple = encoding_parameters
-        self.encoding_function: EncodingFunction = encoding_function
+        self.encoding: Encoding = encoding
 
         self.a: dq.QArray = dq.destroy(self.jpc_config.DIM_A)
         self.a_dag: dq.QArray = self.a.dag()
@@ -61,14 +58,6 @@ class Hamiltonian:
                 ops.append(ket @ ket.dag())
         return ops
 
-    def get_value(self, quantum_parameters: QuantumParameters, name: str, data: jnp.ndarray) -> jnp.ndarray:
-        base_value: float = getattr(quantum_parameters, name)
-
-        if name in self.encoding_parameters:
-            return self.encoding_function(base_value, data)
-
-        return base_value * jnp.ones_like(data)
-
     def H_delta(self, delta_a: jnp.ndarray, delta_b: jnp.ndarray, time_interval: jnp.ndarray) -> PWCTimeQArray:
         return (dq.pwc(time_interval, delta_a,
                        - dq.tensor(self.N_a, dq.eye(self.jpc_config.DIM_B))) +
@@ -106,12 +95,12 @@ class Hamiltonian:
         """
         Assemble un Hamiltonien batché pour N simulations en parallèle.
         """
-        delta_a_vals = jnp.stack([self.get_value(p, "delta_a", data) for p in quantum_parameters_list])
-        delta_b_vals = jnp.stack([self.get_value(p, "delta_b", data) for p in quantum_parameters_list])
-        epsilon_a_vals = jnp.stack([self.get_value(p, "epsilon_a", data) for p in quantum_parameters_list])
-        epsilon_b_vals = jnp.stack([self.get_value(p, "epsilon_b", data) for p in quantum_parameters_list])
-        g_conv_vals = jnp.stack([self.get_value(p, "g_conv", data) for p in quantum_parameters_list])
-        g_sq_vals = jnp.stack([self.get_value(p, "g_sq", data) for p in quantum_parameters_list])
+        delta_a_vals = jnp.stack([self.encoding.get_value(p, "delta_a", data) for p in quantum_parameters_list])
+        delta_b_vals = jnp.stack([self.encoding.get_value(p, "delta_b", data) for p in quantum_parameters_list])
+        epsilon_a_vals = jnp.stack([self.encoding.get_value(p, "epsilon_a", data) for p in quantum_parameters_list])
+        epsilon_b_vals = jnp.stack([self.encoding.get_value(p, "epsilon_b", data) for p in quantum_parameters_list])
+        g_conv_vals = jnp.stack([self.encoding.get_value(p, "g_conv", data) for p in quantum_parameters_list])
+        g_sq_vals = jnp.stack([self.encoding.get_value(p, "g_sq", data) for p in quantum_parameters_list])
 
         H_batched = (
                 self.H_kerr +

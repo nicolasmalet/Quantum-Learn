@@ -5,8 +5,8 @@ from zeroth.abstract import Summary
 from zeroth.zeroth_order.gradient_estimators import GradientEstimator
 from zeroth.zeroth_order.zeroth_order_blackbox import ZerothOrderBlackBox
 
-from quantum_simulation.jpc_chip import JPCChip
-from quantum_simulation.parameters_and_constants import JPCConfig, QuantumParameters
+from quantum_simulation.simulator import Simulator
+from quantum_simulation.parameters_and_constants import JPCConfig, QuantumParameters, Encoding
 from .build_f import BuildF, BuildFConfig
 from .types import Array
 
@@ -15,6 +15,7 @@ from .types import Array
 class QuantumBlackBoxConfig(Summary):
     name: str
     jpc_config: JPCConfig
+    encoding: Encoding
     quantum_parameters: QuantumParameters
     build_f_config: BuildFConfig
 
@@ -30,7 +31,7 @@ class QuantumBlackBox(ZerothOrderBlackBox):
 
         self.jpc_config = config.jpc_config
 
-        self.simulator: JPCChip = JPCChip(config.jpc_config)
+        self.simulator: Simulator = Simulator(config.jpc_config, config.encoding)
 
         self.build_f: BuildF = config.build_f_config.instantiate(config.jpc_config)
         self.output_dim = self.build_f.output_dim
