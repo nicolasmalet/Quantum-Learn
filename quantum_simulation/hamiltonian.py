@@ -34,7 +34,7 @@ class Hamiltonian:
                 self.b + self.b_dag))
 
         self.vacuum_state: dq.QArray = dq.tensor(dq.basis(self.jpc_config.DIM_A, 0),
-                                      dq.basis(self.jpc_config.DIM_B, 0))  # états initiaux === vaccum states
+                                      dq.basis(self.jpc_config.DIM_B, 0))  # états initiaux === vacuum states
         self.jump_ops: list[dq.QArray] = [jnp.sqrt(self.jpc_config.KAPPA_A) * dq.tensor(self.a, dq.eye(self.jpc_config.DIM_B)),
                          jnp.sqrt(self.jpc_config.KAPPA_B) * dq.tensor(dq.eye(self.jpc_config.DIM_A),
                                                                        self.b)]  # Opérateurs de dissipation

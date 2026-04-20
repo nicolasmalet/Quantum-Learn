@@ -1,10 +1,23 @@
-from zeroth.losses import CrossEntropy
+from zeroth.losses import CrossEntropy, MSE
 from zeroth.utils.metrics import Accuracy
 
 from ..config import quantum_network_config as qn, neural_networks as nn
 from quantum_learn.model import QuantumModelConfig
+from quantum_learn.reservoir_model import ReservoirModelConfig
 
 batch_size = 8 * 10
+
+reservoir_model_config = ReservoirModelConfig(
+    name="Quantum Model",
+    id={},
+    loss=MSE(),
+    metric=Accuracy(),
+    batch_size = batch_size,
+
+    quantum_blackbox_config=qn.network_quad,
+    quantum_optimizer_config=qn.zeroth_order_adam,
+    quantum_gradient_estimator=qn.simultaneous_gradient_estimator
+)
 
 base_model = QuantumModelConfig(
     name="Quantum Model",
@@ -16,7 +29,7 @@ base_model = QuantumModelConfig(
     neural_network_config=nn.linear,
     neural_network_optimizer_config=nn.first_order_adam,
 
-    quantum_blackbox_config=qn.quantum_network_config_dudas,
+    quantum_blackbox_config=qn.network_quad,
     quantum_optimizer_config=qn.zeroth_order_adam,
     quantum_gradient_estimator=qn.global_finite_difference
 )
@@ -31,7 +44,7 @@ no_quantum_learning_model = QuantumModelConfig(
     neural_network_config=nn.linear,
     neural_network_optimizer_config=nn.first_order_adam,
 
-    quantum_blackbox_config=qn.quantum_network_config_dudas,
+    quantum_blackbox_config=qn.network_quad,
     quantum_optimizer_config=qn.zeroth_order_adam,
     quantum_gradient_estimator=qn.null_gradient_estimator
 )
@@ -46,7 +59,7 @@ quantum_model_config_dudas_train_all = QuantumModelConfig(
     neural_network_config=nn.XS,
     neural_network_optimizer_config=nn.first_order_adam,
 
-    quantum_blackbox_config=qn.quantum_network_config_dudas,
+    quantum_blackbox_config=qn.network_quad,
     quantum_optimizer_config=qn.zeroth_order_adam,
     quantum_gradient_estimator=qn.global_finite_difference
 )
@@ -62,7 +75,7 @@ quantum_model_config = QuantumModelConfig(
     neural_network_optimizer_config=nn.first_order_adam,
 
     quantum_optimizer_config=qn.zeroth_order_adam,
-    quantum_blackbox_config=qn.quantum_network_config,
+    quantum_blackbox_config=qn.network_quad,
     quantum_gradient_estimator=qn.global_finite_difference
 )
 
@@ -77,7 +90,7 @@ no_quantum_learning_model_xs = QuantumModelConfig(
     neural_network_optimizer_config=nn.first_order_adam,
 
     quantum_optimizer_config=qn.zeroth_order_adam,
-    quantum_blackbox_config=qn.quantum_network_config,
+    quantum_blackbox_config=qn.network_quad,
     quantum_gradient_estimator=qn.null_gradient_estimator,
 )
 
@@ -92,6 +105,6 @@ photon_model_config = QuantumModelConfig(
     neural_network_optimizer_config=nn.first_order_adam,
 
     quantum_optimizer_config=qn.zeroth_order_adam,
-    quantum_blackbox_config=qn.quantum_photon_config,
+    quantum_blackbox_config=qn.network_photon,
     quantum_gradient_estimator=qn.partial_gs_finite_difference
 )

@@ -16,6 +16,6 @@ quantum_lr: ExperimentConfig = ExperimentConfig(name="quantum_lr",
                                                 data_creator=data_creator)
 
 dudas: ExperimentConfig = ExperimentConfig(name="dudas",
-                                           base_model=models.dudas,
+                                           base_model=models.quantum_model_config,
                                            variations=[variations.null_gradient],
                                            data_creator=data_creator)
