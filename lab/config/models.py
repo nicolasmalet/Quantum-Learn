@@ -1,4 +1,5 @@
-from zeroth.losses import CrossEntropy, MSE
+from zeroth.losses import MSE
+from zeroth.losses.binary_cross_entropy import BinaryCrossEntropy
 from zeroth.utils.metrics import Accuracy
 
 from ..config import quantum_network_config as qn, neural_networks as nn
@@ -22,7 +23,7 @@ reservoir_model_config = ReservoirModelConfig(
 base_model = QuantumModelConfig(
     name="Quantum Model",
     id={},
-    loss=CrossEntropy(),
+    loss=BinaryCrossEntropy(),
     metric=Accuracy(),
     batch_size=batch_size,
 
@@ -37,7 +38,7 @@ base_model = QuantumModelConfig(
 no_quantum_learning_model = QuantumModelConfig(
     name="No quantum Learning Model",
     id={},
-    loss=CrossEntropy(),
+    loss=BinaryCrossEntropy(),
     metric=Accuracy(),
     batch_size=batch_size,
 
@@ -52,7 +53,7 @@ no_quantum_learning_model = QuantumModelConfig(
 quantum_model_config_dudas_train_all = QuantumModelConfig(
     name="Quantum Model",
     id={},
-    loss=CrossEntropy(),
+    loss=BinaryCrossEntropy(),
     metric=Accuracy(),
     batch_size=batch_size,
 
@@ -67,7 +68,7 @@ quantum_model_config_dudas_train_all = QuantumModelConfig(
 quantum_model_config = QuantumModelConfig(
     name="Quantum Model",
     id={},
-    loss=CrossEntropy(),
+    loss=BinaryCrossEntropy(),
     metric=Accuracy(),
     batch_size=batch_size,
 
@@ -82,7 +83,7 @@ quantum_model_config = QuantumModelConfig(
 no_quantum_learning_model_xs = QuantumModelConfig(
     name="Quantum Model",
     id={},
-    loss=CrossEntropy(),
+    loss=BinaryCrossEntropy(),
     metric=Accuracy(),
     batch_size=batch_size,
 
@@ -97,7 +98,7 @@ no_quantum_learning_model_xs = QuantumModelConfig(
 photon_model_config = QuantumModelConfig(
     name="Quantum Model",
     id={},
-    loss=CrossEntropy(),
+    loss=BinaryCrossEntropy(),
     metric=Accuracy(),
     batch_size=batch_size,
 
