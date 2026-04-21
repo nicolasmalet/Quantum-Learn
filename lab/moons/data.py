@@ -24,10 +24,8 @@ class DataCreatorMoons(DataCreator):
 
 
 def create_moon_data(n_samples: int, noise: float) -> tuple[np.ndarray, np.ndarray]:
-    X_pts, Y_pts = make_moons(n_samples=n_samples, noise=noise)
-    X = X_pts.reshape(-1, 1)
-    Y = np.repeat(Y_pts, 2).reshape(-1, 1)
-
+    X, Y = make_moons(n_samples=n_samples, noise=noise)
+    Y = Y.reshape(-1, 1)
     return X, Y
 
 
