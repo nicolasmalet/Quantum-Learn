@@ -109,13 +109,13 @@ class BuildFQuadraturesPolynomials(BuildF):
 
 
 @dataclass(frozen=True)
-class BuildFPhotonDistributionConfig(BuildFConfig):
+class BuildFProbasConfig(BuildFConfig):
     clip_probas: int
-    def instantiate(self, jpc_config: JPCConfig) -> BuildFPhotonDistribution:
-        return BuildFPhotonDistribution(jpc_config, self.clip_probas)
+    def instantiate(self, jpc_config: JPCConfig) -> BuildFProbas:
+        return BuildFProbas(jpc_config, self.clip_probas)
 
 
-class BuildFPhotonDistribution(BuildF):
+class BuildFProbas(BuildF):
     def __init__(self, jpc_config: JPCConfig, clip_probas: int):
         self.jpc_config: JPCConfig = jpc_config
 

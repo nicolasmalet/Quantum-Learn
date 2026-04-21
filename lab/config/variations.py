@@ -4,7 +4,8 @@ from lab.config import neural_networks as nn
 from lab.config.quantum_network_config import null_gradient_estimator, global_finite_difference, \
     partial_gs_finite_difference
 from quantum_learn import paths
-
+from lab.config import quantum_network_config as qn
+from quantum_learn import build_f
 classical_lr = VariationConfig(
     name="Learning Rate",
     param=[paths.CLASSICAL_LR],
@@ -33,4 +34,11 @@ gradient_estimators = VariationConfig(
     name="No Quantum Learning",
     param=[paths.GRADIENT_ESTIMATOR],
     values=[[null_gradient_estimator], [partial_gs_finite_difference], [global_finite_difference]]
+)
+build_f = VariationConfig(
+    name="F",
+    param=[paths.BUILD_F],
+    values=[[build_f.BuildFQuadraturesConfig()],
+            [build_f.BuildFQuadraturesPolynomialsConfig()],
+            [build_f.BuildFProbasConfig(clip_probas=2)]]
 )

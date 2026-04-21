@@ -32,7 +32,7 @@ base_model = QuantumModelConfig(
 
     quantum_blackbox_config=qn.network_quad,
     quantum_optimizer_config=qn.zeroth_order_adam,
-    quantum_gradient_estimator=qn.global_finite_difference
+    quantum_gradient_estimator=qn.simultaneous_gradient_estimator
 )
 
 no_quantum_learning_model = QuantumModelConfig(

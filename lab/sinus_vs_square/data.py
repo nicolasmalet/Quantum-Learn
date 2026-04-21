@@ -30,6 +30,6 @@ class DataCreatorSinus(DataCreator):
 
 
 data_creator = DataCreatorSinus(
-    nb_periods_train=300,
-    nb_periods_test=10
+    nb_periods_train=200,
+    nb_periods_test=100
 )

@@ -1,4 +1,4 @@
-from .encoding_functions import Affine
+from .encoding_functions import Linear
 from .parameters_and_constants import JPCConfig, QuantumParameters, Encoding
 
 jpc_config: JPCConfig = JPCConfig(
@@ -42,5 +42,5 @@ quantum_parameters_dudas: QuantumParameters = QuantumParameters(
 
 base_encoding: Encoding = Encoding(
     encoding_parameters=("g_sq",),
-    encoding_function=Affine()
+    encoding_function=Linear()
 )

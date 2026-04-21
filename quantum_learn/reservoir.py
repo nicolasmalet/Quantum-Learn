@@ -19,8 +19,9 @@ class Reservoir(BlackBox):
 
     @staticmethod
     def compute_W(F: Array, Y: Array) -> Array:
-        F_inv = np.linalg.pinv(F)
-        W = F_inv @ Y
+        # F_inv = np.linalg.pinv(F)
+        # W = F_inv @ Y
+        W, _, _, _ = np.linalg.lstsq(F, Y)
         return W
 
     def get_params(self) -> dict:

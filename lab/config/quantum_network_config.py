@@ -27,10 +27,10 @@ network_photon = QuantumBlackBoxConfig(
     jpc_config=jpc_config_dudas,
     encoding=base_encoding,
     quantum_parameters=quantum_parameters_dudas,
-    build_f_config=build_f.BuildFPhotonDistributionConfig(clip_probas=2)
+    build_f_config=build_f.BuildFProbasConfig(clip_probas=2)
 )
 
-zeroth_order_adam = ZerothOrderAdamConfig(learning_rate=0.005,
+zeroth_order_adam = ZerothOrderAdamConfig(learning_rate=0.02,
                                           beta1=0.9,
                                           beta2=0.99,
                                           epsilon=1e-8)
@@ -44,6 +44,6 @@ partial_gs_finite_difference: g_e.PartialFiniteDifferenceConfig = g_e.PartialFin
 null_gradient_estimator: g_e.NullGradientEstimatorConfig = g_e.NullGradientEstimatorConfig()
 
 simultaneous_gradient_estimator = g_e.SimultaneousPerturbationConfig = g_e.SimultaneousPerturbationConfig(dA = 0.1,
-                                                                                              nb_perturbations=1,
+                                                                                              nb_perturbations=2,
                                                                                               get_perturbation_matrix=RademacherMatrix()
                                                                                               )
