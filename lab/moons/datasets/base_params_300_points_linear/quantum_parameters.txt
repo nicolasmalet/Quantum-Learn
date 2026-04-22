@@ -1,0 +1,8 @@
+QuantumParameters(
+    g_conv=900,
+    g_sq=180,
+    epsilon_a=170,
+    epsilon_b=170,
+    delta_a=0,
+    delta_b=0
+)
